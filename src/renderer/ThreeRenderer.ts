@@ -8,15 +8,14 @@ import { latLonToCartesian } from '../geography/coordinates';
 import type { ResolvedCameraOptions } from '../core/types';
 import type { FrameCallback, Renderer } from './Renderer';
 
-/** Atlantic-centered longitude: Africa, Europe, and the Americas are visible. */
-export const INITIAL_VIEW_LONGITUDE = 15;
+export const DEFAULT_CAMERA_LONGITUDE = 0;
 
 const GLOBE_FOV_DEGREES = 45;
 const GLOBE_FIT_MARGIN = 0.86;
 
 /** Returns an outside camera position at the configured latitude. */
-export function getCameraEyePosition(latitude: number, distance: number) {
-  return latLonToCartesian(latitude, INITIAL_VIEW_LONGITUDE, distance);
+export function getCameraEyePosition(latitude: number, longitude: number, distance: number) {
+  return latLonToCartesian(latitude, longitude, distance);
 }
 
 export function getGlobeFrameDistance(radius: number): number {
@@ -103,7 +102,11 @@ export class ThreeRenderer implements Renderer {
     // Fit a sphere's silhouette inside the vertical field of view with margin.
     const distance = getGlobeFrameDistance(radius);
 
-    const eye = getCameraEyePosition(this.cameraOptions.latitude, distance);
+    const eye = getCameraEyePosition(
+      this.cameraOptions.latitude,
+      this.cameraOptions.longitude,
+      distance,
+    );
     this.camera.position.set(eye.x, eye.y, eye.z);
     this.camera.up.set(0, 1, 0);
     this.camera.lookAt(0, 0, 0);

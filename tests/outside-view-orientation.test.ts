@@ -2,7 +2,6 @@ import { PerspectiveCamera, Vector3 } from 'three';
 import { describe, expect, it } from 'vitest';
 import { FULL_TURN_RADIANS } from '../src/animation/rotate';
 import { latLonToCartesian } from '../src/geography/coordinates';
-import { INITIAL_VIEW_LONGITUDE } from '../src/renderer/ThreeRenderer';
 
 const CAMERA_DISTANCE = 3;
 
@@ -37,7 +36,7 @@ describe('outside-view geographic orientation', () => {
   });
 
   it('keeps known continents in their correct outside-view relationships', () => {
-    const camera = createOutsideCamera(0, INITIAL_VIEW_LONGITUDE);
+    const camera = createOutsideCamera(0, 0);
     // Representative interior coordinates, not coastline samples.
     const northAmerica = projectFromOutside(camera, 40, -75);
     const southAmerica = projectFromOutside(camera, -15, -60);

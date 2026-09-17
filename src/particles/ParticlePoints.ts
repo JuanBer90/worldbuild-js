@@ -1,7 +1,6 @@
 import {
   BufferAttribute,
   BufferGeometry,
-  Color,
   Points,
   ShaderMaterial,
   Vector2,
@@ -13,12 +12,14 @@ import {
 } from '../animation/build';
 import type { ResolvedBuildOptions } from '../core/types';
 import type { Particle } from './create-particles';
+import { createParticleColorBuffer } from './particle-colors';
 
 export interface ParticlePointsStyle {
   /** World-space point diameter scale (multiplier on globe radius). */
   size: number;
   globeRadius: number;
   color: string;
+  colors: readonly string[];
   opacity: number;
   hideBackside: boolean;
   build: ResolvedBuildOptions;
@@ -37,12 +38,15 @@ uniform float buildAnimation;
 
 attribute float buildStart;
 attribute vec3 buildOrigin;
+attribute vec3 particleColor;
 varying float vFacing;
 varying float vReveal;
+varying vec3 vColor;
 
 void main() {
   float localProgress = clamp((buildProgress - buildStart) / buildRevealSpan, 0.0, 1.0);
   vReveal = smoothstep(0.0, 1.0, localProgress);
+  vColor = particleColor;
   vec3 edgePosition = mix(buildOrigin, position, vReveal);
   vec3 particlePosition = mix(position, edgePosition, buildAnimation);
   vec4 worldPosition = modelMatrix * vec4(particlePosition, 1.0);
@@ -57,13 +61,13 @@ void main() {
 `;
 
 const PARTICLE_FRAGMENT_SHADER = `
-uniform vec3 color;
 uniform float opacity;
 uniform float hideBackside;
 uniform float buildAnimation;
 
 varying float vFacing;
 varying float vReveal;
+varying vec3 vColor;
 
 void main() {
   if (vReveal <= 0.0) discard;
@@ -72,7 +76,7 @@ void main() {
   vec2 pointCenter = gl_PointCoord - vec2(0.5);
   if (dot(pointCenter, pointCenter) > 0.25) discard;
 
-  gl_FragColor = vec4(color, opacity * vReveal);
+  gl_FragColor = vec4(vColor, opacity * vReveal);
 }
 `;
 
@@ -83,12 +87,14 @@ export class ParticlePoints {
   private readonly positionBuffer: Float32Array;
   private readonly buildStartBuffer: Float32Array;
   private readonly buildOriginBuffer: Float32Array;
+  private readonly colorBuffer: Float32Array;
   private readonly drawingBufferSize = new Vector2();
 
   constructor(particles: readonly Particle[], style: ParticlePointsStyle) {
     this.positionBuffer = new Float32Array(particles.length * 3);
     this.buildStartBuffer = new Float32Array(particles.length);
     this.buildOriginBuffer = new Float32Array(style.buildOrigins);
+    this.colorBuffer = createParticleColorBuffer(particles, style.colors, style.color);
     this.writePositions(particles);
     this.writeBuildStarts(particles, style.build);
 
@@ -96,12 +102,12 @@ export class ParticlePoints {
     this.geometry.setAttribute('position', new BufferAttribute(this.positionBuffer, 3));
     this.geometry.setAttribute('buildStart', new BufferAttribute(this.buildStartBuffer, 1));
     this.geometry.setAttribute('buildOrigin', new BufferAttribute(this.buildOriginBuffer, 3));
+    this.geometry.setAttribute('particleColor', new BufferAttribute(this.colorBuffer, 3));
 
     const worldSize = style.globeRadius * BASE_POINT_SIZE_FRACTION * style.size;
 
     this.material = new ShaderMaterial({
       uniforms: {
-        color: { value: new Color(style.color) },
         opacity: { value: style.opacity },
         pointSize: { value: worldSize },
         pointScale: { value: 1 },

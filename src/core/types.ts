@@ -17,6 +17,8 @@ export interface ParticleOptions {
   density?: number;
   size?: number;
   color?: string;
+  /** Deterministic per-particle palette. Takes precedence over color when non-empty. */
+  colors?: string[];
   opacity?: number;
 }
 
@@ -38,6 +40,8 @@ export interface GlobeOptions {
 export interface CameraOptions {
   /** Observer latitude in degrees. Defaults to an equatorial outside view (0). */
   latitude?: number;
+  /** Observer longitude in degrees. Defaults to the 0° meridian. */
+  longitude?: number;
 }
 
 export interface WorldBuildOptions {
@@ -61,6 +65,7 @@ export interface ResolvedParticleOptions {
   density: number;
   size: number;
   color: string;
+  colors: string[];
   opacity: number;
 }
 
@@ -77,6 +82,7 @@ export interface ResolvedGlobeOptions {
 
 export interface ResolvedCameraOptions {
   latitude: number;
+  longitude: number;
 }
 
 export interface ResolvedWorldBuildOptions {

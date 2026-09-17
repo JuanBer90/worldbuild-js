@@ -42,6 +42,7 @@ const world = new WorldBuild({
     density: 1,
     size: 1,
     color: '#c8e6ff',
+    colors: ['#FF4057', '#22E68A', '#35A7FF'],
     opacity: 0.92,
   },
   rotation: {
@@ -55,6 +56,7 @@ const world = new WorldBuild({
   },
   camera: {
     latitude: 0,
+    longitude: 0,
   },
 });
 ```
@@ -71,11 +73,30 @@ const world = new WorldBuild({
 
 ### `particles`
 
+Single-color particles use `color`:
+
+```ts
+particles: {
+  color: '#ffffff',
+}
+```
+
+Use a palette for deterministic mixed particle colors:
+
+```ts
+particles: {
+  colors: ['#FF4057', '#22E68A', '#35A7FF'],
+}
+```
+
+A non-empty `colors` palette takes precedence over `color`.
+
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
 | `density` | `number` | `1` | Accepted public option; the bundled 5,000-point land dataset is currently rendered at its fixed density. |
 | `size` | `number` | `1` | Multiplier for particle diameter. |
 | `color` | `string` | `'#c8e6ff'` | Particle color accepted by Three.js `Color`. |
+| `colors` | `string[]` | `[]` | Optional palette of Three.js-compatible colors. A non-empty palette takes precedence over `color`; particles receive stable, deterministically mixed palette colors. |
 | `opacity` | `number` | `0.92` | Particle opacity. |
 
 ### `rotation`
@@ -98,6 +119,7 @@ const world = new WorldBuild({
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
 | `latitude` | `number` | `0` | Observer latitude in degrees, from `-90` through `90`. `0` is an equatorial outside view; positive values move toward the north and negative values toward the south. |
+| `longitude` | `number` | `0` | Observer longitude in degrees, from `-180` through `180`. `0` centers the 0° meridian; positive values use east-positive geographic longitude. |
 
 ## Instance methods
 

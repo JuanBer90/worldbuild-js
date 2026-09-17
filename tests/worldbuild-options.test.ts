@@ -3,7 +3,6 @@ import { resolveWorldBuildOptions } from '../src/core/WorldBuild';
 import { latLonToCartesian } from '../src/geography/coordinates';
 import {
   getCameraEyePosition,
-  INITIAL_VIEW_LONGITUDE,
 } from '../src/renderer/ThreeRenderer';
 import type {
   BuildOptions,
@@ -31,9 +30,18 @@ describe('WorldBuild globe options', () => {
     expect(resolve().camera.latitude).toBe(0);
   });
 
+  it('centers the 0° meridian by default', () => {
+    expect(resolve().camera.longitude).toBe(0);
+  });
+
   it('preserves explicit positive and negative camera latitudes', () => {
     expect(resolve(undefined, { latitude: 25 }).camera.latitude).toBe(25);
     expect(resolve(undefined, { latitude: -25 }).camera.latitude).toBe(-25);
+  });
+
+  it('preserves explicit positive and negative camera longitudes', () => {
+    expect(resolve(undefined, { longitude: 90 }).camera.longitude).toBe(90);
+    expect(resolve(undefined, { longitude: -60 }).camera.longitude).toBe(-60);
   });
 
   it('rejects camera latitudes outside the valid degree range', () => {
@@ -41,10 +49,16 @@ describe('WorldBuild globe options', () => {
     expect(() => resolve(undefined, { latitude: -91 })).toThrow(RangeError);
   });
 
+  it('rejects non-finite and out-of-range camera longitudes', () => {
+    expect(() => resolve(undefined, { longitude: 181 })).toThrow(RangeError);
+    expect(() => resolve(undefined, { longitude: -181 })).toThrow(RangeError);
+    expect(() => resolve(undefined, { longitude: Number.NaN })).toThrow(RangeError);
+  });
+
   it('positions latitude zero on the equatorial outside view without changing globe geometry', () => {
-    const equatorialEye = getCameraEyePosition(0, 3);
-    const northernEye = getCameraEyePosition(25, 3);
-    const southernEye = getCameraEyePosition(-25, 3);
+    const equatorialEye = getCameraEyePosition(0, 0, 3);
+    const northernEye = getCameraEyePosition(25, 0, 3);
+    const southernEye = getCameraEyePosition(-25, 0, 3);
     const africa = latLonToCartesian(10, 20, 1);
 
     expect(equatorialEye.y).toBeCloseTo(0);
@@ -53,11 +67,25 @@ describe('WorldBuild globe options', () => {
     expect(africa).toEqual(latLonToCartesian(10, 20, 1));
   });
 
+  it('uses longitude to position the outside camera without changing globe geometry', () => {
+    const primeMeridianEye = getCameraEyePosition(0, 0, 3);
+    const easternEye = getCameraEyePosition(0, 90, 3);
+    const southernEye = getCameraEyePosition(-20, 135, 3);
+    const africa = latLonToCartesian(10, 20, 1);
+
+    expect(primeMeridianEye.z).toBeCloseTo(3);
+    expect(primeMeridianEye.x).toBeCloseTo(0);
+    expect(easternEye.x).toBeCloseTo(3);
+    expect(easternEye.z).toBeCloseTo(0);
+    expect(southernEye.y).toBeLessThan(0);
+    expect(africa).toEqual(latLonToCartesian(10, 20, 1));
+  });
+
   it('keeps backside facing relative to the configured camera position', () => {
-    const eye = getCameraEyePosition(25, 3);
+    const eye = getCameraEyePosition(25, 15, 3);
     const cameraDir = { x: eye.x / 3, y: eye.y / 3, z: eye.z / 3 };
-    const front = latLonToCartesian(25, INITIAL_VIEW_LONGITUDE, 1);
-    const back = latLonToCartesian(-25, INITIAL_VIEW_LONGITUDE - 180, 1);
+    const front = latLonToCartesian(25, 15, 1);
+    const back = latLonToCartesian(-25, -165, 1);
     const dot = (point: typeof front) =>
       point.x * cameraDir.x + point.y * cameraDir.y + point.z * cameraDir.z;
 

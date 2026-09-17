@@ -8,6 +8,7 @@ import { WORLD_LAND_POINTS } from '../data/world-land-points';
 import { createParticlesFromLandTuples } from '../particles/create-particles';
 import { DEFAULT_GLOBE_RADIUS } from '../particles/globe-radius';
 import { ParticlePoints } from '../particles/ParticlePoints';
+import { validateParticleColor } from '../particles/particle-colors';
 import {
   getCameraEyePosition,
   getGlobeFrameDistance,
@@ -24,12 +25,22 @@ const DEFAULT_PARTICLE_COLOR = '#c8e6ff';
 const DEFAULT_PARTICLE_OPACITY = 0.92;
 const DEFAULT_ROTATION_DURATION_MS = 22000;
 const DEFAULT_CAMERA_LATITUDE = 0;
+const DEFAULT_CAMERA_LONGITUDE = 0;
 
 export function resolveWorldBuildOptions(options: WorldBuildOptions): ResolvedWorldBuildOptions {
   const cameraLatitude = options.camera?.latitude ?? DEFAULT_CAMERA_LATITUDE;
   if (!Number.isFinite(cameraLatitude) || cameraLatitude < -90 || cameraLatitude > 90) {
     throw new RangeError('camera.latitude must be a finite number between -90 and 90 degrees');
   }
+  const cameraLongitude = options.camera?.longitude ?? DEFAULT_CAMERA_LONGITUDE;
+  if (!Number.isFinite(cameraLongitude) || cameraLongitude < -180 || cameraLongitude > 180) {
+    throw new RangeError('camera.longitude must be a finite number between -180 and 180 degrees');
+  }
+  const particleColors = options.particles?.colors ?? [];
+  if (!Array.isArray(particleColors)) {
+    throw new TypeError('particles.colors must be an array of color strings');
+  }
+  particleColors.forEach((color, index) => validateParticleColor(color, `particles.colors[${index}]`));
 
   return {
     container: options.container,
@@ -44,6 +55,7 @@ export function resolveWorldBuildOptions(options: WorldBuildOptions): ResolvedWo
       density: options.particles?.density ?? DEFAULT_PARTICLE_DENSITY,
       size: options.particles?.size ?? DEFAULT_PARTICLE_SIZE,
       color: options.particles?.color ?? DEFAULT_PARTICLE_COLOR,
+      colors: [...particleColors],
       opacity: options.particles?.opacity ?? DEFAULT_PARTICLE_OPACITY,
     },
     rotation: {
@@ -57,6 +69,7 @@ export function resolveWorldBuildOptions(options: WorldBuildOptions): ResolvedWo
     },
     camera: {
       latitude: cameraLatitude,
+      longitude: cameraLongitude,
     },
   };
 }
@@ -88,13 +101,18 @@ export class WorldBuild {
     const cameraDistance = getGlobeFrameDistance(this.options.globe.radius);
     const buildOrigins = createFromEdgesOrigins(
       this.particles.length,
-      getCameraEyePosition(this.options.camera.latitude, cameraDistance),
+      getCameraEyePosition(
+        this.options.camera.latitude,
+        this.options.camera.longitude,
+        cameraDistance,
+      ),
       this.options.globe.radius,
     );
     this.particlePoints = new ParticlePoints(this.particles, {
       size: this.options.particles.size,
       globeRadius: this.options.globe.radius,
       color: this.options.particles.color,
+      colors: this.options.particles.colors,
       opacity: this.options.particles.opacity,
       hideBackside: this.options.globe.hideBackside,
       build: this.options.build,

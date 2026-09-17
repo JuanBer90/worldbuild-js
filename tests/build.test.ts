@@ -55,7 +55,7 @@ describe('build controller', () => {
   });
 
   it('creates deterministic edge origins outside the globe from multiple directions', () => {
-    const eye = getCameraEyePosition(0, 3);
+    const eye = getCameraEyePosition(0, 0, 3);
     const first = createFromEdgesOrigins(32, eye, 1);
     const second = createFromEdgesOrigins(32, eye, 1);
     const directions = new Set<string>();
@@ -71,9 +71,9 @@ describe('build controller', () => {
     expect(directions.size).toBeGreaterThan(3);
   });
 
-  it('supports a non-equatorial camera while retaining deterministic edge origins', () => {
-    const equatorial = createFromEdgesOrigins(8, getCameraEyePosition(0, 3), 1);
-    const northern = createFromEdgesOrigins(8, getCameraEyePosition(25, 3), 1);
+  it('supports a non-equatorial, non-zero-longitude camera while retaining deterministic edge origins', () => {
+    const equatorial = createFromEdgesOrigins(8, getCameraEyePosition(0, 0, 3), 1);
+    const northern = createFromEdgesOrigins(8, getCameraEyePosition(25, 90, 3), 1);
 
     expect(northern).not.toEqual(equatorial);
     expect(createFromEdgesStartProgress(12, 0.15)).toBe(createFromEdgesStartProgress(12, 0.15));
@@ -81,7 +81,7 @@ describe('build controller', () => {
 
   it('interpolates from an edge origin to the untouched canonical home position', () => {
     const home = latLonToCartesian(10, 20, 1);
-    const origin = createFromEdgesOrigins(1, getCameraEyePosition(0, 3), 1);
+    const origin = createFromEdgesOrigins(1, getCameraEyePosition(0, 0, 3), 1);
     const atCompletion = {
       x: origin[0]! + (home.x - origin[0]!),
       y: origin[1]! + (home.y - origin[1]!),
