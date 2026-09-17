@@ -13,7 +13,7 @@ const DEFAULT_PARTICLE_DENSITY = 1;
 const DEFAULT_PARTICLE_SIZE = 1;
 const DEFAULT_PARTICLE_COLOR = '#c8e6ff';
 const DEFAULT_PARTICLE_OPACITY = 0.92;
-const DEFAULT_ROTATION_DURATION_MS = 30000;
+const DEFAULT_ROTATION_DURATION_MS = 22000;
 
 function resolveOptions(options: WorldBuildOptions): ResolvedWorldBuildOptions {
   return {
@@ -29,7 +29,7 @@ function resolveOptions(options: WorldBuildOptions): ResolvedWorldBuildOptions {
       opacity: options.particles?.opacity ?? DEFAULT_PARTICLE_OPACITY,
     },
     rotation: {
-      enabled: options.rotation?.enabled ?? false,
+      enabled: options.rotation?.enabled ?? true,
       duration: options.rotation?.duration ?? DEFAULT_ROTATION_DURATION_MS,
       direction: options.rotation?.direction ?? 'clockwise',
     },
@@ -71,7 +71,14 @@ export class WorldBuild {
     });
     this.renderer.setParticlePoints(this.particlePoints.object);
     this.renderer.frameGlobe(this.options.globe.radius);
+    this.renderer.setFrameCallback((deltaMilliseconds) => {
+      this.particlePoints.object.rotation.y = this.rotationController.advance(deltaMilliseconds);
+    });
     this.renderer.render();
+
+    if (this.options.rotation.enabled) {
+      this.play();
+    }
   }
 
   /** Prepare or run the construction sequence (not yet implemented). */
@@ -84,6 +91,7 @@ export class WorldBuild {
   play(): void {
     this.assertAlive();
     this.rotationController.start();
+    this.renderer.startRenderLoop();
   }
 
   /** Pause animation playback (not yet implemented). */
@@ -91,6 +99,7 @@ export class WorldBuild {
     this.assertAlive();
     this.buildController.stop();
     this.rotationController.stop();
+    this.renderer.stopRenderLoop();
   }
 
   /** Reset animation state (not yet implemented). */

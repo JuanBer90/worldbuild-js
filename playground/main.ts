@@ -14,7 +14,7 @@ const world = new WorldBuild({
     opacity: 0.85,
   },
   build: {},
-  rotation: { enabled: false },
+  rotation: { enabled: true, duration: 22000 },
 });
 
 const onResize = () => {

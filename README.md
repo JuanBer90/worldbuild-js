@@ -45,7 +45,7 @@ const world = new WorldBuild({
   container: document.getElementById('globe')!,
   build: { direction: 'south-to-north', duration: 8000 },
   particles: { density: 1, size: 1, color: '#ffffff', opacity: 1 },
-  rotation: { enabled: true, duration: 30000, direction: 'clockwise' },
+  rotation: { enabled: true, duration: 22000, direction: 'clockwise' },
 });
 
 world.build();
@@ -56,7 +56,7 @@ world.play();
 // world.destroy();
 ```
 
-Construction and rotation animations are **not implemented** yet. The library renders a static particle Earth from the generated land dataset.
+The library continuously rotates the particle Earth when `rotation.enabled` is true. Construction animation is not implemented yet.
 
 ## Current status
 
@@ -64,7 +64,8 @@ Construction and rotation animations are **not implemented** yet. The library re
 - Renderer abstraction with a transparent Three.js canvas
 - ~5,000 land particles from Natural Earth 1:110m (generated via `npm run generate:data`)
 - Geographic `lat`/`lon` → Cartesian conversion (tested)
-- Placeholder modules for build and rotation animation
+- Continuous Y-axis rotation with pause/resume lifecycle support
+- Placeholder module for build animation
 
 ## Intended V1
 

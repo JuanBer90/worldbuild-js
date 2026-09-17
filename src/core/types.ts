@@ -13,8 +13,11 @@ export interface ParticleOptions {
 }
 
 export interface RotationOptions {
+  /** Defaults to true; set false to initialize a static globe. */
   enabled?: boolean;
+  /** Milliseconds per full 360° revolution. Defaults to 22,000. */
   duration?: number;
+  /** Direction when viewed from above the north pole. Defaults to clockwise. */
   direction?: 'clockwise' | 'counterclockwise';
 }
 

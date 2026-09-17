@@ -5,7 +5,7 @@ import {
   WebGLRenderer,
 } from 'three';
 import { latLonToCartesian } from '../geography/coordinates';
-import type { Renderer } from './Renderer';
+import type { FrameCallback, Renderer } from './Renderer';
 
 /** Camera latitude/longitude (degrees) for the initial static view. */
 const INITIAL_VIEW_LATITUDE = -22;
@@ -18,6 +18,10 @@ export class ThreeRenderer implements Renderer {
   private camera: PerspectiveCamera | null = null;
   private webglRenderer: WebGLRenderer | null = null;
   private particlePoints: Points | null = null;
+  private frameCallback: FrameCallback | null = null;
+  private frameRequestId: number | null = null;
+  private previousFrameTime: number | null = null;
+  private renderLoopActive = false;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -54,6 +58,28 @@ export class ThreeRenderer implements Renderer {
     }
     this.particlePoints = points;
     this.scene.add(points);
+  }
+
+  setFrameCallback(callback: FrameCallback | null): void {
+    this.frameCallback = callback;
+  }
+
+  startRenderLoop(): void {
+    if (this.renderLoopActive || !this.webglRenderer) {
+      return;
+    }
+    this.renderLoopActive = true;
+    this.previousFrameTime = null;
+    this.frameRequestId = window.requestAnimationFrame(this.onFrame);
+  }
+
+  stopRenderLoop(): void {
+    this.renderLoopActive = false;
+    if (this.frameRequestId !== null) {
+      window.cancelAnimationFrame(this.frameRequestId);
+      this.frameRequestId = null;
+    }
+    this.previousFrameTime = null;
   }
 
   frameGlobe(radius: number): void {
@@ -98,6 +124,8 @@ export class ThreeRenderer implements Renderer {
   }
 
   destroy(): void {
+    this.stopRenderLoop();
+    this.frameCallback = null;
     if (this.scene && this.particlePoints) {
       this.scene.remove(this.particlePoints);
     }
@@ -113,4 +141,20 @@ export class ThreeRenderer implements Renderer {
     this.camera = null;
     this.webglRenderer = null;
   }
+
+  private readonly onFrame = (time: number): void => {
+    this.frameRequestId = null;
+    if (!this.renderLoopActive || !this.webglRenderer) {
+      this.frameRequestId = null;
+      return;
+    }
+
+    const previousFrameTime = this.previousFrameTime ?? time;
+    this.previousFrameTime = time;
+    this.frameCallback?.(time - previousFrameTime);
+    this.render();
+    if (this.renderLoopActive) {
+      this.frameRequestId = window.requestAnimationFrame(this.onFrame);
+    }
+  };
 }
