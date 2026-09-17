@@ -14,8 +14,14 @@ const DEFAULT_PARTICLE_SIZE = 1;
 const DEFAULT_PARTICLE_COLOR = '#c8e6ff';
 const DEFAULT_PARTICLE_OPACITY = 0.92;
 const DEFAULT_ROTATION_DURATION_MS = 22000;
+const DEFAULT_CAMERA_LATITUDE = 0;
 
-function resolveOptions(options: WorldBuildOptions): ResolvedWorldBuildOptions {
+export function resolveWorldBuildOptions(options: WorldBuildOptions): ResolvedWorldBuildOptions {
+  const cameraLatitude = options.camera?.latitude ?? DEFAULT_CAMERA_LATITUDE;
+  if (!Number.isFinite(cameraLatitude) || cameraLatitude < -90 || cameraLatitude > 90) {
+    throw new RangeError('camera.latitude must be a finite number between -90 and 90 degrees');
+  }
+
   return {
     container: options.container,
     build: {
@@ -35,6 +41,10 @@ function resolveOptions(options: WorldBuildOptions): ResolvedWorldBuildOptions {
     },
     globe: {
       radius: options.globe?.radius ?? DEFAULT_GLOBE_RADIUS,
+      hideBackside: options.globe?.hideBackside ?? true,
+    },
+    camera: {
+      latitude: cameraLatitude,
     },
   };
 }
@@ -52,8 +62,8 @@ export class WorldBuild {
     if (!options.container) {
       throw new Error('WorldBuild requires a container HTMLElement');
     }
-    this.options = resolveOptions(options);
-    this.renderer = new ThreeRenderer(this.options.container);
+    this.options = resolveWorldBuildOptions(options);
+    this.renderer = new ThreeRenderer(this.options.container, this.options.camera);
     this.buildController = createBuildController(this.options.build);
     this.rotationController = createRotationController(this.options.rotation);
     this.renderer.initialize();
@@ -68,6 +78,7 @@ export class WorldBuild {
       globeRadius: this.options.globe.radius,
       color: this.options.particles.color,
       opacity: this.options.particles.opacity,
+      hideBackside: this.options.globe.hideBackside,
     });
     this.renderer.setParticlePoints(this.particlePoints.object);
     this.renderer.frameGlobe(this.options.globe.radius);

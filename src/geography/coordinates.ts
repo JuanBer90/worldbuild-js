@@ -9,6 +9,8 @@ const DEG_TO_RAD = Math.PI / 180;
 /**
  * Converts geographic latitude/longitude to Cartesian coordinates on a sphere.
  * Y is the north pole axis; longitude 0° lies on the positive Z axis at the equator.
+ * Positive longitude is east: an outside camera facing a reference meridian sees
+ * east to screen-right and west to screen-left.
  */
 export function latLonToCartesian(
   latitude: number,

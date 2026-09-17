@@ -5,4 +5,6 @@ export type {
   BuildOptions,
   ParticleOptions,
   RotationOptions,
+  GlobeOptions,
+  CameraOptions,
 } from './core/types';

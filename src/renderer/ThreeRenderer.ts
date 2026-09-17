@@ -5,15 +5,20 @@ import {
   WebGLRenderer,
 } from 'three';
 import { latLonToCartesian } from '../geography/coordinates';
+import type { ResolvedCameraOptions } from '../core/types';
 import type { FrameCallback, Renderer } from './Renderer';
 
-/** Camera latitude/longitude (degrees) for the initial static view. */
-const INITIAL_VIEW_LATITUDE = -22;
 /** Atlantic-centered longitude: Africa, Europe, and the Americas are visible. */
-const INITIAL_VIEW_LONGITUDE = 15;
+export const INITIAL_VIEW_LONGITUDE = 15;
+
+/** Returns an outside camera position at the configured latitude. */
+export function getCameraEyePosition(latitude: number, distance: number) {
+  return latLonToCartesian(latitude, INITIAL_VIEW_LONGITUDE, distance);
+}
 
 export class ThreeRenderer implements Renderer {
   private readonly container: HTMLElement;
+  private readonly cameraOptions: ResolvedCameraOptions;
   private scene: Scene | null = null;
   private camera: PerspectiveCamera | null = null;
   private webglRenderer: WebGLRenderer | null = null;
@@ -23,8 +28,9 @@ export class ThreeRenderer implements Renderer {
   private previousFrameTime: number | null = null;
   private renderLoopActive = false;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, cameraOptions: ResolvedCameraOptions) {
     this.container = container;
+    this.cameraOptions = cameraOptions;
   }
 
   initialize(): void {
@@ -91,7 +97,7 @@ export class ThreeRenderer implements Renderer {
     // Fit a sphere's silhouette inside the vertical field of view with margin.
     const distance = radius / Math.sin(Math.atan(Math.tan(fovRadians / 2) * fitMargin));
 
-    const eye = latLonToCartesian(INITIAL_VIEW_LATITUDE, INITIAL_VIEW_LONGITUDE, distance);
+    const eye = getCameraEyePosition(this.cameraOptions.latitude, distance);
     this.camera.position.set(eye.x, eye.y, eye.z);
     this.camera.up.set(0, 1, 0);
     this.camera.lookAt(0, 0, 0);

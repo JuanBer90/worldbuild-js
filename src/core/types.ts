@@ -23,6 +23,13 @@ export interface RotationOptions {
 
 export interface GlobeOptions {
   radius?: number;
+  /** Hide particles on the hemisphere facing away from the camera. Defaults to true. */
+  hideBackside?: boolean;
+}
+
+export interface CameraOptions {
+  /** Observer latitude in degrees. Defaults to an equatorial outside view (0). */
+  latitude?: number;
 }
 
 export interface WorldBuildOptions {
@@ -31,6 +38,7 @@ export interface WorldBuildOptions {
   particles?: ParticleOptions;
   rotation?: RotationOptions;
   globe?: GlobeOptions;
+  camera?: CameraOptions;
 }
 
 export interface ResolvedBuildOptions {
@@ -53,6 +61,11 @@ export interface ResolvedRotationOptions {
 
 export interface ResolvedGlobeOptions {
   radius: number;
+  hideBackside: boolean;
+}
+
+export interface ResolvedCameraOptions {
+  latitude: number;
 }
 
 export interface ResolvedWorldBuildOptions {
@@ -61,4 +74,5 @@ export interface ResolvedWorldBuildOptions {
   particles: ResolvedParticleOptions;
   rotation: ResolvedRotationOptions;
   globe: ResolvedGlobeOptions;
+  camera: ResolvedCameraOptions;
 }

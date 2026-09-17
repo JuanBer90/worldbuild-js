@@ -7,7 +7,8 @@ if (!container) {
 
 const world = new WorldBuild({
   container,
-  globe: { radius: 1 },
+  globe: { radius: 1, hideBackside: true },
+  camera: { latitude: 0 },
   particles: {
     size: 1,
     color: '#b8d4f0',
