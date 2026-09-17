@@ -68,6 +68,7 @@ describe('WorldBuild globe options', () => {
   it('uses the south-to-north build defaults', () => {
     expect(resolve().build).toEqual({
       enabled: true,
+      animation: 'south-to-north',
       direction: 'south-to-north',
       duration: 4000,
       randomness: 0.12,
@@ -76,5 +77,9 @@ describe('WorldBuild globe options', () => {
 
   it('preserves a disabled build option', () => {
     expect(resolve(undefined, undefined, { enabled: false }).build.enabled).toBe(false);
+  });
+
+  it('preserves an explicit from-edges build animation', () => {
+    expect(resolve(undefined, undefined, { animation: 'from-edges' }).build.animation).toBe('from-edges');
   });
 });

@@ -1,10 +1,13 @@
 export type BuildDirection = 'south-to-north' | 'north-to-south';
+export type BuildAnimation = 'south-to-north' | 'from-edges';
 
 export interface BuildOptions {
   /** Construct the globe before rotation. Defaults to true. */
   enabled?: boolean;
+  /** Construction strategy. Defaults to south-to-north. */
+  animation?: BuildAnimation;
   direction?: BuildDirection;
-  /** Milliseconds for the south-to-north reveal. Defaults to 4,000. */
+  /** Milliseconds for the selected construction animation. Defaults to 4,000. */
   duration?: number;
   /** Deterministic timing variation around latitude order. Defaults to 0.12. */
   randomness?: number;
@@ -48,6 +51,7 @@ export interface WorldBuildOptions {
 
 export interface ResolvedBuildOptions {
   enabled: boolean;
+  animation: BuildAnimation;
   direction: BuildDirection;
   duration: number;
   randomness: number;

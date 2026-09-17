@@ -1,10 +1,18 @@
-import { createBuildController, type BuildController } from '../animation/build';
+import {
+  createBuildController,
+  createFromEdgesOrigins,
+  type BuildController,
+} from '../animation/build';
 import { createRotationController, type RotationController } from '../animation/rotate';
 import { WORLD_LAND_POINTS } from '../data/world-land-points';
 import { createParticlesFromLandTuples } from '../particles/create-particles';
 import { DEFAULT_GLOBE_RADIUS } from '../particles/globe-radius';
 import { ParticlePoints } from '../particles/ParticlePoints';
-import { ThreeRenderer } from '../renderer/ThreeRenderer';
+import {
+  getCameraEyePosition,
+  getGlobeFrameDistance,
+  ThreeRenderer,
+} from '../renderer/ThreeRenderer';
 import type { ResolvedWorldBuildOptions, WorldBuildOptions } from './types';
 
 const DEFAULT_BUILD_DURATION_MS = 4000;
@@ -27,6 +35,7 @@ export function resolveWorldBuildOptions(options: WorldBuildOptions): ResolvedWo
     container: options.container,
     build: {
       enabled: options.build?.enabled ?? true,
+      animation: options.build?.animation ?? 'south-to-north',
       direction: options.build?.direction ?? 'south-to-north',
       duration: options.build?.duration ?? DEFAULT_BUILD_DURATION_MS,
       randomness: options.build?.randomness ?? DEFAULT_BUILD_RANDOMNESS,
@@ -76,6 +85,12 @@ export class WorldBuild {
       opacity: this.options.particles.opacity,
       color: this.options.particles.color,
     });
+    const cameraDistance = getGlobeFrameDistance(this.options.globe.radius);
+    const buildOrigins = createFromEdgesOrigins(
+      this.particles.length,
+      getCameraEyePosition(this.options.camera.latitude, cameraDistance),
+      this.options.globe.radius,
+    );
     this.particlePoints = new ParticlePoints(this.particles, {
       size: this.options.particles.size,
       globeRadius: this.options.globe.radius,
@@ -83,6 +98,7 @@ export class WorldBuild {
       opacity: this.options.particles.opacity,
       hideBackside: this.options.globe.hideBackside,
       build: this.options.build,
+      buildOrigins,
     });
     this.renderer.setParticlePoints(this.particlePoints.object);
     this.renderer.frameGlobe(this.options.globe.radius);

@@ -6,7 +6,11 @@ import {
   ShaderMaterial,
   Vector2,
 } from 'three';
-import { createBuildStartProgress, BUILD_REVEAL_SPAN } from '../animation/build';
+import {
+  createBuildStartProgress,
+  createFromEdgesStartProgress,
+  BUILD_REVEAL_SPAN,
+} from '../animation/build';
 import type { ResolvedBuildOptions } from '../core/types';
 import type { Particle } from './create-particles';
 
@@ -18,6 +22,7 @@ export interface ParticlePointsStyle {
   opacity: number;
   hideBackside: boolean;
   build: ResolvedBuildOptions;
+  buildOrigins: Float32Array;
 }
 
 /** Base point diameter as a fraction of globe radius (world units). */
@@ -28,20 +33,23 @@ uniform float pointSize;
 uniform float pointScale;
 uniform float buildProgress;
 uniform float buildRevealSpan;
+uniform float buildAnimation;
 
 attribute float buildStart;
+attribute vec3 buildOrigin;
 varying float vFacing;
 varying float vReveal;
 
 void main() {
-  vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+  float localProgress = clamp((buildProgress - buildStart) / buildRevealSpan, 0.0, 1.0);
+  vReveal = smoothstep(0.0, 1.0, localProgress);
+  vec3 edgePosition = mix(buildOrigin, position, vReveal);
+  vec3 particlePosition = mix(position, edgePosition, buildAnimation);
+  vec4 worldPosition = modelMatrix * vec4(particlePosition, 1.0);
   vec3 worldCenter = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
   vec3 surfaceDir = normalize(worldPosition.xyz - worldCenter);
   vec3 cameraDir = normalize(cameraPosition - worldCenter);
   vFacing = dot(surfaceDir, cameraDir);
-  float localProgress = clamp((buildProgress - buildStart) / buildRevealSpan, 0.0, 1.0);
-  vReveal = smoothstep(0.0, 1.0, localProgress);
-
   vec4 mvPosition = viewMatrix * worldPosition;
   gl_Position = projectionMatrix * mvPosition;
   gl_PointSize = pointSize * max(vReveal, 0.001) * pointScale * projectionMatrix[1][1] / -mvPosition.z;
@@ -52,13 +60,14 @@ const PARTICLE_FRAGMENT_SHADER = `
 uniform vec3 color;
 uniform float opacity;
 uniform float hideBackside;
+uniform float buildAnimation;
 
 varying float vFacing;
 varying float vReveal;
 
 void main() {
   if (vReveal <= 0.0) discard;
-  if (hideBackside > 0.5 && vFacing < 0.0) discard;
+  if (hideBackside > 0.5 && (buildAnimation < 0.5 || vReveal >= 1.0) && vFacing < 0.0) discard;
 
   vec2 pointCenter = gl_PointCoord - vec2(0.5);
   if (dot(pointCenter, pointCenter) > 0.25) discard;
@@ -73,17 +82,20 @@ export class ParticlePoints {
   private readonly material: ShaderMaterial;
   private readonly positionBuffer: Float32Array;
   private readonly buildStartBuffer: Float32Array;
+  private readonly buildOriginBuffer: Float32Array;
   private readonly drawingBufferSize = new Vector2();
 
   constructor(particles: readonly Particle[], style: ParticlePointsStyle) {
     this.positionBuffer = new Float32Array(particles.length * 3);
     this.buildStartBuffer = new Float32Array(particles.length);
+    this.buildOriginBuffer = new Float32Array(style.buildOrigins);
     this.writePositions(particles);
     this.writeBuildStarts(particles, style.build);
 
     this.geometry = new BufferGeometry();
     this.geometry.setAttribute('position', new BufferAttribute(this.positionBuffer, 3));
     this.geometry.setAttribute('buildStart', new BufferAttribute(this.buildStartBuffer, 1));
+    this.geometry.setAttribute('buildOrigin', new BufferAttribute(this.buildOriginBuffer, 3));
 
     const worldSize = style.globeRadius * BASE_POINT_SIZE_FRACTION * style.size;
 
@@ -96,6 +108,7 @@ export class ParticlePoints {
         hideBackside: { value: style.hideBackside ? 1 : 0 },
         buildProgress: { value: style.build.enabled ? 0 : 1 },
         buildRevealSpan: { value: BUILD_REVEAL_SPAN },
+        buildAnimation: { value: style.build.animation === 'from-edges' ? 1 : 0 },
       },
       vertexShader: PARTICLE_VERTEX_SHADER,
       fragmentShader: PARTICLE_FRAGMENT_SHADER,
@@ -142,11 +155,9 @@ export class ParticlePoints {
   private writeBuildStarts(particles: readonly Particle[], build: ResolvedBuildOptions): void {
     for (let index = 0; index < particles.length; index++) {
       const particle = particles[index]!;
-      this.buildStartBuffer[index] = createBuildStartProgress(
-        particle.latitude,
-        index,
-        build.randomness,
-      );
+      this.buildStartBuffer[index] = build.animation === 'from-edges'
+        ? createFromEdgesStartProgress(index, build.randomness)
+        : createBuildStartProgress(particle.latitude, index, build.randomness);
     }
   }
 }

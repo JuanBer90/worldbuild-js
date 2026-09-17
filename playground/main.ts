@@ -7,14 +7,14 @@ if (!container) {
 
 const world = new WorldBuild({
   container,
-  globe: { radius: 1, hideBackside: true },
+  globe: { radius: 1, hideBackside: false },
   camera: { latitude: 0 },
   particles: {
-    size: 1,
+    size: 2.5,
     color: '#b8d4f0',
     opacity: 0.85,
   },
-  build: { enabled: true, duration: 4000, direction: 'south-to-north', randomness: 0.12 },
+  build: { enabled: true, animation: 'from-edges', duration: 8000, randomness: 0.15 },
   rotation: { enabled: true, duration: 22000 },
 });
 
