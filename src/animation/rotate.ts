@@ -5,6 +5,7 @@ export const FULL_TURN_RADIANS = Math.PI * 2;
 export interface RotationController {
   start(): void;
   stop(): void;
+  reset(): void;
   /** Advance by elapsed milliseconds and return the absolute Y-axis angle in radians. */
   advance(deltaMilliseconds: number): number;
 }
@@ -29,6 +30,10 @@ export function createRotationController(options: ResolvedRotationOptions): Rota
     },
     stop() {
       running = false;
+    },
+    reset() {
+      running = false;
+      angle = 0;
     },
     advance(deltaMilliseconds: number) {
       if (!running || !Number.isFinite(deltaMilliseconds) || deltaMilliseconds <= 0) {

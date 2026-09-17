@@ -5,12 +5,17 @@ import {
   getCameraEyePosition,
   INITIAL_VIEW_LONGITUDE,
 } from '../src/renderer/ThreeRenderer';
-import type { CameraOptions, GlobeOptions, WorldBuildOptions } from '../src/core/types';
+import type {
+  BuildOptions,
+  CameraOptions,
+  GlobeOptions,
+  WorldBuildOptions,
+} from '../src/core/types';
 
 const container = {} as HTMLElement;
 
-function resolve(globe?: GlobeOptions, camera?: CameraOptions) {
-  return resolveWorldBuildOptions({ container, globe, camera } as WorldBuildOptions);
+function resolve(globe?: GlobeOptions, camera?: CameraOptions, build?: BuildOptions) {
+  return resolveWorldBuildOptions({ container, globe, camera, build } as WorldBuildOptions);
 }
 
 describe('WorldBuild globe options', () => {
@@ -58,5 +63,18 @@ describe('WorldBuild globe options', () => {
 
     expect(dot(front)).toBeGreaterThan(0);
     expect(dot(back)).toBeLessThan(0);
+  });
+
+  it('uses the south-to-north build defaults', () => {
+    expect(resolve().build).toEqual({
+      enabled: true,
+      direction: 'south-to-north',
+      duration: 4000,
+      randomness: 0.12,
+    });
+  });
+
+  it('preserves a disabled build option', () => {
+    expect(resolve(undefined, undefined, { enabled: false }).build.enabled).toBe(false);
   });
 });

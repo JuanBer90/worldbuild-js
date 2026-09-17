@@ -1,8 +1,13 @@
 export type BuildDirection = 'south-to-north' | 'north-to-south';
 
 export interface BuildOptions {
+  /** Construct the globe before rotation. Defaults to true. */
+  enabled?: boolean;
   direction?: BuildDirection;
+  /** Milliseconds for the south-to-north reveal. Defaults to 4,000. */
   duration?: number;
+  /** Deterministic timing variation around latitude order. Defaults to 0.12. */
+  randomness?: number;
 }
 
 export interface ParticleOptions {
@@ -42,8 +47,10 @@ export interface WorldBuildOptions {
 }
 
 export interface ResolvedBuildOptions {
+  enabled: boolean;
   direction: BuildDirection;
   duration: number;
+  randomness: number;
 }
 
 export interface ResolvedParticleOptions {

@@ -7,7 +7,8 @@ import { ParticlePoints } from '../particles/ParticlePoints';
 import { ThreeRenderer } from '../renderer/ThreeRenderer';
 import type { ResolvedWorldBuildOptions, WorldBuildOptions } from './types';
 
-const DEFAULT_BUILD_DURATION_MS = 8000;
+const DEFAULT_BUILD_DURATION_MS = 4000;
+const DEFAULT_BUILD_RANDOMNESS = 0.12;
 const DEFAULT_PARTICLE_DENSITY = 1;
 /** Multiplier for world-space point size (see ParticlePoints). */
 const DEFAULT_PARTICLE_SIZE = 1;
@@ -25,8 +26,10 @@ export function resolveWorldBuildOptions(options: WorldBuildOptions): ResolvedWo
   return {
     container: options.container,
     build: {
+      enabled: options.build?.enabled ?? true,
       direction: options.build?.direction ?? 'south-to-north',
       duration: options.build?.duration ?? DEFAULT_BUILD_DURATION_MS,
+      randomness: options.build?.randomness ?? DEFAULT_BUILD_RANDOMNESS,
     },
     particles: {
       density: options.particles?.density ?? DEFAULT_PARTICLE_DENSITY,
@@ -79,33 +82,53 @@ export class WorldBuild {
       color: this.options.particles.color,
       opacity: this.options.particles.opacity,
       hideBackside: this.options.globe.hideBackside,
+      build: this.options.build,
     });
     this.renderer.setParticlePoints(this.particlePoints.object);
     this.renderer.frameGlobe(this.options.globe.radius);
     this.renderer.setFrameCallback((deltaMilliseconds) => {
-      this.particlePoints.object.rotation.y = this.rotationController.advance(deltaMilliseconds);
+      const buildWasComplete = this.buildController.isComplete();
+      this.particlePoints.setBuildProgress(this.buildController.advance(deltaMilliseconds));
+
+      if (!buildWasComplete && this.buildController.isComplete() && this.options.rotation.enabled) {
+        this.rotationController.start();
+      }
+      if (buildWasComplete) {
+        this.particlePoints.object.rotation.y = this.rotationController.advance(deltaMilliseconds);
+      }
     });
     this.renderer.render();
 
-    if (this.options.rotation.enabled) {
+    if (this.options.build.enabled) {
+      this.build();
+    } else if (this.options.rotation.enabled) {
       this.play();
     }
   }
 
-  /** Prepare or run the construction sequence (not yet implemented). */
+  /** Start or resume the construction sequence. */
   build(): void {
     this.assertAlive();
+    if (this.buildController.isComplete()) {
+      return;
+    }
+    this.rotationController.stop();
     this.buildController.start();
-  }
-
-  /** Resume animation playback (not yet implemented). */
-  play(): void {
-    this.assertAlive();
-    this.rotationController.start();
     this.renderer.startRenderLoop();
   }
 
-  /** Pause animation playback (not yet implemented). */
+  /** Resume construction, or rotation after construction has completed. */
+  play(): void {
+    this.assertAlive();
+    if (this.buildController.isComplete()) {
+      this.rotationController.start();
+    } else {
+      this.buildController.start();
+    }
+    this.renderer.startRenderLoop();
+  }
+
+  /** Pause construction or rotation without changing their current progress. */
   pause(): void {
     this.assertAlive();
     this.buildController.stop();
@@ -113,17 +136,21 @@ export class WorldBuild {
     this.renderer.stopRenderLoop();
   }
 
-  /** Reset animation state (not yet implemented). */
+  /** Reset construction visibility and rotation back to their initial state. */
   reset(): void {
     this.assertAlive();
     this.buildController.reset();
+    this.rotationController.reset();
+    this.renderer.stopRenderLoop();
+    this.particlePoints.setBuildProgress(this.buildController.getProgress());
+    this.particlePoints.object.rotation.y = 0;
+    this.renderer.render();
   }
 
-  /** Reset and play from the beginning (not yet implemented). */
+  /** Reset and replay construction before restarting rotation. */
   replay(): void {
     this.assertAlive();
     this.reset();
-    this.build();
     this.play();
   }
 

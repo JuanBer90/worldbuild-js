@@ -3,6 +3,13 @@ import { describe, expect, it } from 'vitest';
 import { createParticlesFromLandTuples } from '../src/particles/create-particles';
 import { ParticlePoints } from '../src/particles/ParticlePoints';
 
+const BUILD_OPTIONS = {
+  enabled: true,
+  direction: 'south-to-north' as const,
+  duration: 4000,
+  randomness: 0.12,
+};
+
 describe('ParticlePoints', () => {
   it('uses a dedicated GPU shader with an optional center-based hemisphere discard', () => {
     const particles = createParticlesFromLandTuples([[0, 0]], 1, {
@@ -16,6 +23,7 @@ describe('ParticlePoints', () => {
       color: '#123456',
       opacity: 0.75,
       hideBackside: true,
+      build: BUILD_OPTIONS,
     });
     const material = particlePoints.object.material as ShaderMaterial;
 
@@ -28,6 +36,8 @@ describe('ParticlePoints', () => {
     expect(material.uniforms.pointSize!.value).toBeCloseTo(0.06);
     expect(material.uniforms.opacity!.value).toBe(0.75);
     expect(material.uniforms.hideBackside!.value).toBe(1);
+    expect(material.uniforms.buildProgress!.value).toBe(0);
+    expect(particlePoints.object.geometry.getAttribute('buildStart')).toBeDefined();
 
     particlePoints.dispose();
   });
@@ -44,10 +54,12 @@ describe('ParticlePoints', () => {
       color: '#ffffff',
       opacity: 1,
       hideBackside: false,
+      build: { ...BUILD_OPTIONS, enabled: false },
     });
     const material = particlePoints.object.material as ShaderMaterial;
 
     expect(material.uniforms.hideBackside!.value).toBe(0);
+    expect(material.uniforms.buildProgress!.value).toBe(1);
 
     particlePoints.dispose();
   });

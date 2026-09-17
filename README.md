@@ -43,7 +43,7 @@ import { WorldBuild } from 'worldbuild-js';
 
 const world = new WorldBuild({
   container: document.getElementById('globe')!,
-  build: { direction: 'south-to-north', duration: 8000 },
+  build: { enabled: true, direction: 'south-to-north', duration: 4000, randomness: 0.12 },
   particles: { density: 1, size: 1, color: '#ffffff', opacity: 1 },
   rotation: { enabled: true, duration: 22000, direction: 'clockwise' },
 });
@@ -56,7 +56,7 @@ world.play();
 // world.destroy();
 ```
 
-The library continuously rotates the particle Earth when `rotation.enabled` is true. Construction animation is not implemented yet.
+The library constructs the particle Earth from south to north by default, then continuously rotates it when `rotation.enabled` is true. Set `build.enabled` to `false` for an immediately complete globe.
 
 ## Current status
 
@@ -65,7 +65,7 @@ The library continuously rotates the particle Earth when `rotation.enabled` is t
 - ~5,000 land particles from Natural Earth 1:110m (generated via `npm run generate:data`)
 - Geographic `lat`/`lon` → Cartesian conversion (tested)
 - Continuous Y-axis rotation with pause/resume lifecycle support
-- Placeholder module for build animation
+- GPU-driven south-to-north construction animation
 
 ## Intended V1
 

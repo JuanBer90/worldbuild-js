@@ -6,6 +6,8 @@ import {
   ShaderMaterial,
   Vector2,
 } from 'three';
+import { createBuildStartProgress, BUILD_REVEAL_SPAN } from '../animation/build';
+import type { ResolvedBuildOptions } from '../core/types';
 import type { Particle } from './create-particles';
 
 export interface ParticlePointsStyle {
@@ -15,6 +17,7 @@ export interface ParticlePointsStyle {
   color: string;
   opacity: number;
   hideBackside: boolean;
+  build: ResolvedBuildOptions;
 }
 
 /** Base point diameter as a fraction of globe radius (world units). */
@@ -23,8 +26,12 @@ const BASE_POINT_SIZE_FRACTION = 0.01;
 const PARTICLE_VERTEX_SHADER = `
 uniform float pointSize;
 uniform float pointScale;
+uniform float buildProgress;
+uniform float buildRevealSpan;
 
+attribute float buildStart;
 varying float vFacing;
+varying float vReveal;
 
 void main() {
   vec4 worldPosition = modelMatrix * vec4(position, 1.0);
@@ -32,10 +39,12 @@ void main() {
   vec3 surfaceDir = normalize(worldPosition.xyz - worldCenter);
   vec3 cameraDir = normalize(cameraPosition - worldCenter);
   vFacing = dot(surfaceDir, cameraDir);
+  float localProgress = clamp((buildProgress - buildStart) / buildRevealSpan, 0.0, 1.0);
+  vReveal = smoothstep(0.0, 1.0, localProgress);
 
   vec4 mvPosition = viewMatrix * worldPosition;
   gl_Position = projectionMatrix * mvPosition;
-  gl_PointSize = pointSize * pointScale * projectionMatrix[1][1] / -mvPosition.z;
+  gl_PointSize = pointSize * max(vReveal, 0.001) * pointScale * projectionMatrix[1][1] / -mvPosition.z;
 }
 `;
 
@@ -45,14 +54,16 @@ uniform float opacity;
 uniform float hideBackside;
 
 varying float vFacing;
+varying float vReveal;
 
 void main() {
+  if (vReveal <= 0.0) discard;
   if (hideBackside > 0.5 && vFacing < 0.0) discard;
 
   vec2 pointCenter = gl_PointCoord - vec2(0.5);
   if (dot(pointCenter, pointCenter) > 0.25) discard;
 
-  gl_FragColor = vec4(color, opacity);
+  gl_FragColor = vec4(color, opacity * vReveal);
 }
 `;
 
@@ -61,14 +72,18 @@ export class ParticlePoints {
   private readonly geometry: BufferGeometry;
   private readonly material: ShaderMaterial;
   private readonly positionBuffer: Float32Array;
+  private readonly buildStartBuffer: Float32Array;
   private readonly drawingBufferSize = new Vector2();
 
   constructor(particles: readonly Particle[], style: ParticlePointsStyle) {
     this.positionBuffer = new Float32Array(particles.length * 3);
+    this.buildStartBuffer = new Float32Array(particles.length);
     this.writePositions(particles);
+    this.writeBuildStarts(particles, style.build);
 
     this.geometry = new BufferGeometry();
     this.geometry.setAttribute('position', new BufferAttribute(this.positionBuffer, 3));
+    this.geometry.setAttribute('buildStart', new BufferAttribute(this.buildStartBuffer, 1));
 
     const worldSize = style.globeRadius * BASE_POINT_SIZE_FRACTION * style.size;
 
@@ -79,6 +94,8 @@ export class ParticlePoints {
         pointSize: { value: worldSize },
         pointScale: { value: 1 },
         hideBackside: { value: style.hideBackside ? 1 : 0 },
+        buildProgress: { value: style.build.enabled ? 0 : 1 },
+        buildRevealSpan: { value: BUILD_REVEAL_SPAN },
       },
       vertexShader: PARTICLE_VERTEX_SHADER,
       fragmentShader: PARTICLE_FRAGMENT_SHADER,
@@ -101,6 +118,11 @@ export class ParticlePoints {
     position.needsUpdate = true;
   }
 
+  /** Update the single global reveal uniform; particle attributes remain static. */
+  setBuildProgress(progress: number): void {
+    this.material.uniforms.buildProgress!.value = Math.min(1, Math.max(0, progress));
+  }
+
   dispose(): void {
     this.object.onBeforeRender = () => undefined;
     this.geometry.dispose();
@@ -114,6 +136,17 @@ export class ParticlePoints {
       this.positionBuffer[offset] = particle.current.x;
       this.positionBuffer[offset + 1] = particle.current.y;
       this.positionBuffer[offset + 2] = particle.current.z;
+    }
+  }
+
+  private writeBuildStarts(particles: readonly Particle[], build: ResolvedBuildOptions): void {
+    for (let index = 0; index < particles.length; index++) {
+      const particle = particles[index]!;
+      this.buildStartBuffer[index] = createBuildStartProgress(
+        particle.latitude,
+        index,
+        build.randomness,
+      );
     }
   }
 }

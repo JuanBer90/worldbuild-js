@@ -14,7 +14,7 @@ const world = new WorldBuild({
     color: '#b8d4f0',
     opacity: 0.85,
   },
-  build: {},
+  build: { enabled: true, duration: 4000, direction: 'south-to-north', randomness: 0.12 },
   rotation: { enabled: true, duration: 22000 },
 });
 
