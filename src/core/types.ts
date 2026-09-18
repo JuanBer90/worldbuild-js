@@ -1,5 +1,6 @@
 export type BuildDirection = 'south-to-north' | 'north-to-south';
 export type BuildAnimation = 'south-to-north' | 'from-edges';
+export type ColorDistribution = 'random' | 'spatial';
 
 export interface BuildOptions {
   /** Construct the globe before rotation. Defaults to true. */
@@ -19,6 +20,10 @@ export interface ParticleOptions {
   color?: string;
   /** Deterministic per-particle palette. Takes precedence over color when non-empty. */
   colors?: string[];
+  /** Palette assignment strategy. Defaults to deterministic per-particle random mixing. */
+  colorDistribution?: ColorDistribution;
+  /** Spatial palette region scale. Smaller values create larger regions. Defaults to 0.25. */
+  colorScale?: number;
   opacity?: number;
 }
 
@@ -66,6 +71,8 @@ export interface ResolvedParticleOptions {
   size: number;
   color: string;
   colors: string[];
+  colorDistribution: ColorDistribution;
+  colorScale: number;
   opacity: number;
 }
 

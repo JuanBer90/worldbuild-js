@@ -10,7 +10,7 @@ import {
   createFromEdgesStartProgress,
   BUILD_REVEAL_SPAN,
 } from '../animation/build';
-import type { ResolvedBuildOptions } from '../core/types';
+import type { ColorDistribution, ResolvedBuildOptions } from '../core/types';
 import type { Particle } from './create-particles';
 import { createParticleColorBuffer } from './particle-colors';
 
@@ -20,6 +20,8 @@ export interface ParticlePointsStyle {
   globeRadius: number;
   color: string;
   colors: readonly string[];
+  colorDistribution?: ColorDistribution;
+  colorScale?: number;
   opacity: number;
   hideBackside: boolean;
   build: ResolvedBuildOptions;
@@ -94,7 +96,13 @@ export class ParticlePoints {
     this.positionBuffer = new Float32Array(particles.length * 3);
     this.buildStartBuffer = new Float32Array(particles.length);
     this.buildOriginBuffer = new Float32Array(style.buildOrigins);
-    this.colorBuffer = createParticleColorBuffer(particles, style.colors, style.color);
+    this.colorBuffer = createParticleColorBuffer(
+      particles,
+      style.colors,
+      style.color,
+      style.colorDistribution,
+      style.colorScale,
+    );
     this.writePositions(particles);
     this.writeBuildStarts(particles, style.build);
 

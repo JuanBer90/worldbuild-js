@@ -10,9 +10,11 @@ const world = new WorldBuild({
   globe: { radius: 1, hideBackside: false },
   camera: { latitude: 0, longitude: 0 },
   particles: {
-    size: 1,
+    size: 2,
     color: '#b8d4f0',
     colors: ['#FF4057', '#FF9D32', '#F6D83B', '#22E68A', '#1EDBE5', '#35A7FF', '#9A4DFF'],
+    colorDistribution: 'spatial',
+    colorScale: 0.25,
     opacity: 0.85,
   },
   build: { enabled: true, animation: 'from-edges', duration: 8000, randomness: 0.15 },

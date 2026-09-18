@@ -55,6 +55,76 @@ describe('particle palettes', () => {
     expect(represented.size).toBe(palette.length);
   });
 
+  it('keeps default and explicit random assignments identical to the existing palette algorithm', () => {
+    const particles = createParticlesFromLandTuples(
+      [[0, 0], [10, 20], [-20, 45], [40, -90], [60, 120], [-45, -135]],
+      1,
+      { size: 1, color: '#ffffff', opacity: 1 },
+    );
+    const palette = ['#ff0000', '#00ff00', '#0000ff'];
+    const defaultColors = createParticleColorBuffer(particles, palette, '#ffffff');
+    const explicitRandomColors = createParticleColorBuffer(particles, palette, '#ffffff', 'random', 0.25);
+
+    expect(Array.from(defaultColors)).toEqual([1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0]);
+    expect(explicitRandomColors).toEqual(defaultColors);
+    expect(resolve({ colors: palette }).particles.colorDistribution).toBe('random');
+  });
+
+  it('creates deterministic, coherent spatial palette regions from canonical home positions', () => {
+    const particles = createParticlesFromLandTuples(
+      [[0, 0], [0, 0.1], [0, 0.2], [0, 0.3], [0, 90], [30, 45], [-30, -45]],
+      1,
+      { size: 1, color: '#ffffff', opacity: 1 },
+    );
+    const palette = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff', '#ffffff'];
+    const first = createParticleColorBuffer(particles, palette, '#ffffff', 'spatial', 0.25);
+    const second = createParticleColorBuffer(particles, palette, '#ffffff', 'spatial', 0.25);
+    const colorAt = (buffer: Float32Array, index: number) => Array.from(buffer.slice(index * 3, index * 3 + 3)).join(':');
+
+    expect(first).toEqual(second);
+    expect(colorAt(first, 0)).toBe(colorAt(first, 1));
+    expect(colorAt(first, 1)).toBe(colorAt(first, 2));
+    expect(colorAt(first, 2)).toBe(colorAt(first, 3));
+    expect(colorAt(first, 0)).not.toBe(colorAt(first, 5));
+  });
+
+  it('keeps spatial color continuous across the longitude seam and changes frequency with scale', () => {
+    const seamParticles = createParticlesFromLandTuples(
+      [[0, 180], [0, -179.9]],
+      1,
+      { size: 1, color: '#ffffff', opacity: 1 },
+    );
+    const nearbyParticles = createParticlesFromLandTuples(
+      Array.from({ length: 41 }, (_, index) => [10, index * 0.5] as [number, number]),
+      1,
+      { size: 1, color: '#ffffff', opacity: 1 },
+    );
+    const palette = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff', '#ffffff'];
+    const seamColors = createParticleColorBuffer(seamParticles, palette, '#ffffff', 'spatial', 0.25);
+    const largeRegions = createParticleColorBuffer(nearbyParticles, palette, '#ffffff', 'spatial', 0.1);
+    const smallRegions = createParticleColorBuffer(nearbyParticles, palette, '#ffffff', 'spatial', 0.5);
+    const transitions = (buffer: Float32Array) => {
+      let total = 0;
+      for (let index = 1; index < nearbyParticles.length; index++) {
+        const previous = Array.from(buffer.slice((index - 1) * 3, index * 3)).join(':');
+        const current = Array.from(buffer.slice(index * 3, index * 3 + 3)).join(':');
+        if (previous !== current) total++;
+      }
+      return total;
+    };
+
+    expect(Array.from(seamColors.slice(0, 3))).toEqual(Array.from(seamColors.slice(3, 6)));
+    expect(transitions(largeRegions)).toBeLessThan(transitions(smallRegions));
+  });
+
+  it('validates spatial distribution settings only when a palette is active', () => {
+    expect(resolve({ colorDistribution: 'spatial', colorScale: 0.25 }).particles.colorDistribution).toBe('random');
+    expect(() => resolve({ colors: ['#ff4057'], colorDistribution: 'unknown' as 'random' }))
+      .toThrow(RangeError);
+    expect(() => resolve({ colors: ['#ff4057'], colorScale: 0 })).toThrow(RangeError);
+    expect(() => resolve({ colors: ['#ff4057'], colorScale: Number.NaN })).toThrow(RangeError);
+  });
+
   it('rejects invalid palette entries instead of generating shader data for them', () => {
     expect(() => resolve({ colors: ['#ff4057', 'not-a-color'] })).toThrow(RangeError);
     expect(() => resolve({ colors: [42 as unknown as string] })).toThrow(TypeError);

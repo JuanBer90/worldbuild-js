@@ -22,6 +22,8 @@ const DEFAULT_PARTICLE_DENSITY = 1;
 /** Multiplier for world-space point size (see ParticlePoints). */
 const DEFAULT_PARTICLE_SIZE = 1;
 const DEFAULT_PARTICLE_COLOR = '#c8e6ff';
+const DEFAULT_COLOR_DISTRIBUTION = 'random';
+const DEFAULT_COLOR_SCALE = 0.25;
 const DEFAULT_PARTICLE_OPACITY = 0.92;
 const DEFAULT_ROTATION_DURATION_MS = 22000;
 const DEFAULT_CAMERA_LATITUDE = 0;
@@ -41,6 +43,18 @@ export function resolveWorldBuildOptions(options: WorldBuildOptions): ResolvedWo
     throw new TypeError('particles.colors must be an array of color strings');
   }
   particleColors.forEach((color, index) => validateParticleColor(color, `particles.colors[${index}]`));
+  let colorDistribution: 'random' | 'spatial' = DEFAULT_COLOR_DISTRIBUTION;
+  let colorScale = DEFAULT_COLOR_SCALE;
+  if (particleColors.length > 0) {
+    colorDistribution = options.particles?.colorDistribution ?? DEFAULT_COLOR_DISTRIBUTION;
+    if (colorDistribution !== 'random' && colorDistribution !== 'spatial') {
+      throw new RangeError('particles.colorDistribution must be "random" or "spatial"');
+    }
+    colorScale = options.particles?.colorScale ?? DEFAULT_COLOR_SCALE;
+    if (!Number.isFinite(colorScale) || colorScale <= 0 || colorScale > 1) {
+      throw new RangeError('particles.colorScale must be a finite number greater than 0 and at most 1');
+    }
+  }
 
   return {
     container: options.container,
@@ -56,6 +70,8 @@ export function resolveWorldBuildOptions(options: WorldBuildOptions): ResolvedWo
       size: options.particles?.size ?? DEFAULT_PARTICLE_SIZE,
       color: options.particles?.color ?? DEFAULT_PARTICLE_COLOR,
       colors: [...particleColors],
+      colorDistribution,
+      colorScale,
       opacity: options.particles?.opacity ?? DEFAULT_PARTICLE_OPACITY,
     },
     rotation: {
@@ -113,6 +129,8 @@ export class WorldBuild {
       globeRadius: this.options.globe.radius,
       color: this.options.particles.color,
       colors: this.options.particles.colors,
+      colorDistribution: this.options.particles.colorDistribution,
+      colorScale: this.options.particles.colorScale,
       opacity: this.options.particles.opacity,
       hideBackside: this.options.globe.hideBackside,
       build: this.options.build,
