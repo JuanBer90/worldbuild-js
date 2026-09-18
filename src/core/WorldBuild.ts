@@ -14,7 +14,7 @@ import {
   getGlobeFrameDistance,
   ThreeRenderer,
 } from '../renderer/ThreeRenderer';
-import type { ResolvedWorldBuildOptions, WorldBuildOptions } from './types';
+import type { ColorDistribution, ResolvedWorldBuildOptions, WorldBuildOptions } from './types';
 
 const DEFAULT_BUILD_DURATION_MS = 4000;
 const DEFAULT_BUILD_RANDOMNESS = 0.12;
@@ -43,12 +43,12 @@ export function resolveWorldBuildOptions(options: WorldBuildOptions): ResolvedWo
     throw new TypeError('particles.colors must be an array of color strings');
   }
   particleColors.forEach((color, index) => validateParticleColor(color, `particles.colors[${index}]`));
-  let colorDistribution: 'random' | 'spatial' = DEFAULT_COLOR_DISTRIBUTION;
+  let colorDistribution: ColorDistribution = DEFAULT_COLOR_DISTRIBUTION;
   let colorScale = DEFAULT_COLOR_SCALE;
   if (particleColors.length > 0) {
     colorDistribution = options.particles?.colorDistribution ?? DEFAULT_COLOR_DISTRIBUTION;
-    if (colorDistribution !== 'random' && colorDistribution !== 'spatial') {
-      throw new RangeError('particles.colorDistribution must be "random" or "spatial"');
+    if (colorDistribution !== 'random' && colorDistribution !== 'spatial' && colorDistribution !== 'continent') {
+      throw new RangeError('particles.colorDistribution must be "random", "spatial", or "continent"');
     }
     colorScale = options.particles?.colorScale ?? DEFAULT_COLOR_SCALE;
     if (!Number.isFinite(colorScale) || colorScale <= 0 || colorScale > 1) {

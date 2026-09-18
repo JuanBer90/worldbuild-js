@@ -4,6 +4,7 @@ import { resolveWorldBuildOptions } from '../src/core/WorldBuild';
 import { createParticlesFromLandTuples } from '../src/particles/create-particles';
 import { createParticleColorBuffer } from '../src/particles/particle-colors';
 import type { WorldBuildOptions } from '../src/core/types';
+import { CONTINENT_ID } from '../src/data/continents';
 
 const container = {} as HTMLElement;
 
@@ -123,6 +124,35 @@ describe('particle palettes', () => {
       .toThrow(RangeError);
     expect(() => resolve({ colors: ['#ff4057'], colorScale: 0 })).toThrow(RangeError);
     expect(() => resolve({ colors: ['#ff4057'], colorScale: Number.NaN })).toThrow(RangeError);
+  });
+
+  it('assigns one stable palette color to each continent and cycles short palettes', () => {
+    const particles = createParticlesFromLandTuples([
+      [40, -100, CONTINENT_ID.NORTH_AMERICA],
+      [30, -90, CONTINENT_ID.NORTH_AMERICA],
+      [-15, -60, CONTINENT_ID.SOUTH_AMERICA],
+      [50, 15, CONTINENT_ID.EUROPE],
+      [10, 20, CONTINENT_ID.AFRICA],
+      [35, 90, CONTINENT_ID.ASIA],
+      [-25, 135, CONTINENT_ID.OCEANIA],
+      [-75, 0, CONTINENT_ID.ANTARCTICA],
+    ], 1, { size: 1, color: '#ffffff', opacity: 1 });
+    const palette = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff', '#ffffff'];
+    const colors = createParticleColorBuffer(particles, palette, '#ffffff', 'continent');
+    const colorAt = (index: number) => Array.from(colors.slice(index * 3, index * 3 + 3)).join(':');
+    const shortPalette = createParticleColorBuffer(particles, ['#ff0000', '#00ff00', '#0000ff'], '#ffffff', 'continent');
+
+    expect(colorAt(0)).toBe(colorAt(1));
+    expect(new Set(Array.from({ length: 8 }, (_, index) => colorAt(index))).size).toBe(7);
+    expect(Array.from(shortPalette)).toEqual([
+      1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1,
+      1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0,
+    ]);
+  });
+
+  it('accepts continent distribution without changing random or spatial assignments', () => {
+    expect(resolve({ colors: ['#ff4057'], colorDistribution: 'continent' }).particles.colorDistribution)
+      .toBe('continent');
   });
 
   it('rejects invalid palette entries instead of generating shader data for them', () => {

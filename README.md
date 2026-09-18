@@ -103,14 +103,23 @@ particles: {
 
 `colorScale` applies only to `spatial`: smaller values create larger regions, while larger values create smaller, more frequent regions.
 
+Use continent distribution to assign one stable palette color to each Natural Earth continent group:
+
+```ts
+particles: {
+  colors: ['#FF4057', '#FF9D32', '#F6D83B', '#22E68A', '#1EDBE5', '#35A7FF', '#9A4DFF'],
+  colorDistribution: 'continent',
+}
+```
+
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
 | `density` | `number` | `1` | Accepted public option; the bundled 5,000-point land dataset is currently rendered at its fixed density. |
 | `size` | `number` | `1` | Multiplier for particle diameter. |
 | `color` | `string` | `'#c8e6ff'` | Particle color accepted by Three.js `Color`. |
 | `colors` | `string[]` | `[]` | Optional palette of Three.js-compatible colors. A non-empty palette takes precedence over `color`; particles receive stable, deterministically mixed palette colors. |
-| `colorDistribution` | `'random' \| 'spatial'` | `'random'` | Palette assignment strategy. `random` deterministically mixes colors per particle; `spatial` groups nearby geographic particles into organic regions. |
-| `colorScale` | `number` | `0.25` | Spatial-region scale from greater than `0` through `1`. Smaller values create larger regions; larger values create smaller regions. Ignored without a palette or when `colorDistribution` is `random`. |
+| `colorDistribution` | `'random' \| 'spatial' \| 'continent'` | `'random'` | Palette assignment strategy. `random` deterministically mixes colors per particle; `spatial` groups nearby geographic particles into organic regions; `continent` assigns one color per Natural Earth continent group. |
+| `colorScale` | `number` | `0.25` | Spatial-region scale from greater than `0` through `1`. Smaller values create larger regions; larger values create smaller regions. Ignored without a palette or unless `colorDistribution` is `spatial`. |
 | `opacity` | `number` | `0.92` | Particle opacity. |
 
 ### `rotation`
@@ -149,7 +158,7 @@ particles: {
 
 ## Development
 
-Requires Node.js 24 LTS (`>=24 <25`). The bundled land data is generated from [Natural Earth 1:110m Land](https://www.naturalearthdata.com/) (`data/source/world-land.geojson`). After changing that source file, regenerate the runtime dataset:
+Requires Node.js 24 LTS (`>=24 <25`). The bundled land data and compact continent IDs are generated from [Natural Earth 1:110m Land](https://www.naturalearthdata.com/) (`data/source/world-land.geojson`) and Natural Earth 1:110m Admin 0 Countries (`data/source/world-countries.geojson`). After changing either source file, regenerate the runtime dataset:
 
 ```bash
 npm run generate:data

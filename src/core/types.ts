@@ -1,6 +1,6 @@
 export type BuildDirection = 'south-to-north' | 'north-to-south';
 export type BuildAnimation = 'south-to-north' | 'from-edges';
-export type ColorDistribution = 'random' | 'spatial';
+export type ColorDistribution = 'random' | 'spatial' | 'continent';
 
 export interface BuildOptions {
   /** Construct the globe before rotation. Defaults to true. */

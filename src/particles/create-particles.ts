@@ -1,9 +1,11 @@
 import { latLonToCartesian, type Vector3 } from '../geography/coordinates';
 import type { LandPointTuple } from '../data/world-land-points';
+import { CONTINENT_ID, type ContinentId } from '../data/continents';
 
 export interface Particle {
   latitude: number;
   longitude: number;
+  continentId: ContinentId;
   home: Vector3;
   current: Vector3;
   size: number;
@@ -26,11 +28,12 @@ export function createParticlesFromLandTuples(
   radius: number,
   options: CreateParticlesInput,
 ): Particle[] {
-  return landTuples.map(([latitude, longitude]) => {
+  return landTuples.map(([latitude, longitude, continentId]) => {
     const home = latLonToCartesian(latitude, longitude, radius);
     return {
       latitude,
       longitude,
+      continentId: continentId ?? CONTINENT_ID.NORTH_AMERICA,
       home: cloneVector3(home),
       current: cloneVector3(home),
       size: options.size,
@@ -41,10 +44,14 @@ export function createParticlesFromLandTuples(
 }
 
 export function createParticles(
-  samples: readonly { latitude: number; longitude: number }[],
+  samples: readonly { latitude: number; longitude: number; continentId?: ContinentId }[],
   radius: number,
   options: CreateParticlesInput,
 ): Particle[] {
-  const tuples: LandPointTuple[] = samples.map((sample) => [sample.latitude, sample.longitude]);
+  const tuples: LandPointTuple[] = samples.map((sample) => [
+    sample.latitude,
+    sample.longitude,
+    sample.continentId ?? CONTINENT_ID.NORTH_AMERICA,
+  ]);
   return createParticlesFromLandTuples(tuples, radius, options);
 }

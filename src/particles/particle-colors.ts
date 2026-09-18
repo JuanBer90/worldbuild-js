@@ -33,7 +33,7 @@ export function createParticleColorBuffer(
   particles: readonly Particle[],
   colors: readonly string[],
   fallbackColor: string,
-  distribution: 'random' | 'spatial' = 'random',
+  distribution: 'random' | 'spatial' | 'continent' = 'random',
   colorScale = 0.25,
 ): Float32Array {
   const palette = resolveParticlePalette(colors, fallbackColor);
@@ -44,7 +44,9 @@ export function createParticleColorBuffer(
     const particle = particles[index]!;
     const colorIndex = distribution === 'spatial'
       ? spatialPaletteIndex(particle, paletteColors.length, colorScale)
-      : randomPaletteIndex(index, particle.latitude, particle.longitude, paletteColors.length);
+      : distribution === 'continent'
+        ? continentPaletteIndex(particle, paletteColors.length)
+        : randomPaletteIndex(index, particle.latitude, particle.longitude, paletteColors.length);
     const color = paletteColors[colorIndex]!;
     const offset = index * 3;
     buffer[offset] = color.r;
@@ -62,6 +64,10 @@ function randomPaletteIndex(index: number, latitude: number, longitude: number, 
   value ^= Math.round((longitude + 180) * 10_000) >>> 0;
   value = Math.imul(value ^ (value >>> 16), 0x45d9f3b);
   return ((value ^ (value >>> 16)) >>> 0) % paletteLength;
+}
+
+function continentPaletteIndex(particle: Particle, paletteLength: number): number {
+  return particle.continentId % paletteLength;
 }
 
 function spatialPaletteIndex(particle: Particle, paletteLength: number, colorScale: number): number {
