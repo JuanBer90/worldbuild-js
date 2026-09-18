@@ -1,4 +1,4 @@
-import type { ResolvedRotationOptions } from '../core/types';
+import type { ResolvedRotationOptions } from '../core/types.js';
 
 export const FULL_TURN_RADIANS = Math.PI * 2;
 

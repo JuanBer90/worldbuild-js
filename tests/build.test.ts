@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import {
-  BUILD_SETTLE_DURATION_MS,
   createBuildController,
   createFromEdgesOrigins,
   createFromEdgesStartProgress,
@@ -93,13 +92,11 @@ describe('build controller', () => {
     expect(atCompletion.z).toBeCloseTo(home.z);
   });
 
-  it('reaches a fully visible globe before completing its settle phase', () => {
+  it('completes immediately when build progress reaches one', () => {
     const build = createBuildController(BUILD_OPTIONS);
     build.start();
 
     expect(build.advance(BUILD_OPTIONS.duration)).toBe(1);
-    expect(build.isComplete()).toBe(false);
-    build.advance(BUILD_SETTLE_DURATION_MS);
     expect(build.isComplete()).toBe(true);
   });
 
@@ -117,23 +114,25 @@ describe('build controller', () => {
   it('resets construction for replay', () => {
     const build = createBuildController(BUILD_OPTIONS);
     build.start();
-    build.advance(BUILD_OPTIONS.duration + BUILD_SETTLE_DURATION_MS);
+    build.advance(BUILD_OPTIONS.duration);
     build.reset();
 
     expect(build.getProgress()).toBe(0);
     expect(build.isComplete()).toBe(false);
   });
 
-  it('does not advance rotation until construction and settling have completed', () => {
-    const build = createBuildController(BUILD_OPTIONS);
-    const rotation = createRotationController(ROTATION_OPTIONS);
-    build.start();
+  it.each(['south-to-north', 'from-edges'] as const)(
+    'starts rotation immediately when the %s build completes',
+    (animation) => {
+      const build = createBuildController({ ...BUILD_OPTIONS, animation });
+      const rotation = createRotationController(ROTATION_OPTIONS);
+      build.start();
 
-    build.advance(BUILD_OPTIONS.duration);
-    expect(rotation.advance(1000)).toBe(0);
-    build.advance(BUILD_SETTLE_DURATION_MS);
-    rotation.start();
+      build.advance(BUILD_OPTIONS.duration);
+      expect(build.isComplete()).toBe(true);
+      rotation.start();
 
-    expect(rotation.advance(1000)).toBeGreaterThan(0);
-  });
+      expect(rotation.advance(1000)).toBeGreaterThan(0);
+    },
+  );
 });

@@ -22,6 +22,7 @@ export default defineConfig({
   plugins: [
     dts({
       include: ['src'],
+      exclude: ['src/data/world-land-points.json'],
       rollupTypes: true,
     }),
   ],

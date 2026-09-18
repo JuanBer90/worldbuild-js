@@ -1,6 +1,6 @@
-import { latLonToCartesian, type Vector3 } from '../geography/coordinates';
-import type { LandPointTuple } from '../data/world-land-points';
-import { CONTINENT_ID, type ContinentId } from '../data/continents';
+import { latLonToCartesian, type Vector3 } from '../geography/coordinates.js';
+import type { LandPointTuple } from '../data/world-land-points.js';
+import { CONTINENT_ID, type ContinentId } from '../data/continents.js';
 
 export interface Particle {
   latitude: number;

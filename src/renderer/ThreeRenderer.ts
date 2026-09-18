@@ -4,9 +4,9 @@ import {
   Scene,
   WebGLRenderer,
 } from 'three';
-import { latLonToCartesian } from '../geography/coordinates';
-import type { ResolvedCameraOptions } from '../core/types';
-import type { FrameCallback, Renderer } from './Renderer';
+import { latLonToCartesian } from '../geography/coordinates.js';
+import type { ResolvedCameraOptions } from '../core/types.js';
+import type { FrameCallback, Renderer } from './Renderer.js';
 
 export const DEFAULT_CAMERA_LONGITUDE = 0;
 

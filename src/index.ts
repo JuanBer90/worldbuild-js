@@ -1,4 +1,4 @@
-export { WorldBuild } from './core/WorldBuild';
+export { WorldBuild } from './core/WorldBuild.js';
 
 export type {
   WorldBuildOptions,
@@ -9,4 +9,4 @@ export type {
   RotationOptions,
   GlobeOptions,
   CameraOptions,
-} from './core/types';
+} from './core/types.js';

@@ -2,19 +2,19 @@ import {
   createBuildController,
   createFromEdgesOrigins,
   type BuildController,
-} from '../animation/build';
-import { createRotationController, type RotationController } from '../animation/rotate';
-import { WORLD_LAND_POINTS } from '../data/world-land-points';
-import { createParticlesFromLandTuples } from '../particles/create-particles';
-import { DEFAULT_GLOBE_RADIUS } from '../particles/globe-radius';
-import { ParticlePoints } from '../particles/ParticlePoints';
-import { validateParticleColor } from '../particles/particle-colors';
+} from '../animation/build.js';
+import { createRotationController, type RotationController } from '../animation/rotate.js';
+import { WORLD_LAND_POINTS } from '../data/world-land-points.js';
+import { createParticlesFromLandTuples } from '../particles/create-particles.js';
+import { DEFAULT_GLOBE_RADIUS } from '../particles/globe-radius.js';
+import { ParticlePoints } from '../particles/ParticlePoints.js';
+import { validateParticleColor } from '../particles/particle-colors.js';
 import {
   getCameraEyePosition,
   getGlobeFrameDistance,
   ThreeRenderer,
-} from '../renderer/ThreeRenderer';
-import type { ColorDistribution, ResolvedWorldBuildOptions, WorldBuildOptions } from './types';
+} from '../renderer/ThreeRenderer.js';
+import type { ColorDistribution, ResolvedWorldBuildOptions, WorldBuildOptions } from './types.js';
 
 const DEFAULT_BUILD_DURATION_MS = 4000;
 const DEFAULT_BUILD_RANDOMNESS = 0.12;

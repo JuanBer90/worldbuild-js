@@ -1,10 +1,9 @@
-import type { ResolvedBuildOptions } from '../core/types';
-import type { Vector3 } from '../geography/coordinates';
+import type { ResolvedBuildOptions } from '../core/types.js';
+import type { Vector3 } from '../geography/coordinates.js';
 
 export const BUILD_REVEAL_SPAN = 0.14;
-export const BUILD_SETTLE_DURATION_MS = 500;
 
-export type BuildPhase = 'idle' | 'building' | 'settling' | 'complete';
+export type BuildPhase = 'idle' | 'building' | 'complete';
 
 export interface BuildController {
   start(): void;
@@ -86,7 +85,6 @@ export function createBuildController(options: ResolvedBuildOptions): BuildContr
   let phase: BuildPhase = options.enabled ? 'idle' : 'complete';
   let progress = options.enabled ? 0 : 1;
   let running = false;
-  let settleElapsed = 0;
 
   return {
     start() {
@@ -104,28 +102,17 @@ export function createBuildController(options: ResolvedBuildOptions): BuildContr
       phase = options.enabled ? 'idle' : 'complete';
       progress = options.enabled ? 0 : 1;
       running = false;
-      settleElapsed = 0;
     },
     advance(deltaMilliseconds: number) {
       if (!running || !Number.isFinite(deltaMilliseconds) || deltaMilliseconds <= 0) {
         return progress;
       }
 
-      let remaining = deltaMilliseconds;
       if (phase === 'building') {
         const remainingBuildTime = (1 - progress) * options.duration;
-        const buildStep = Math.min(remaining, remainingBuildTime);
+        const buildStep = Math.min(deltaMilliseconds, remainingBuildTime);
         progress = Math.min(1, progress + buildStep / options.duration);
-        remaining -= buildStep;
         if (progress === 1) {
-          phase = 'settling';
-        }
-      }
-
-      if (phase === 'settling' && remaining > 0) {
-        const settleStep = Math.min(remaining, BUILD_SETTLE_DURATION_MS - settleElapsed);
-        settleElapsed += settleStep;
-        if (settleElapsed >= BUILD_SETTLE_DURATION_MS) {
           phase = 'complete';
           running = false;
         }

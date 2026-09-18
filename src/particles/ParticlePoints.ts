@@ -9,10 +9,10 @@ import {
   createBuildStartProgress,
   createFromEdgesStartProgress,
   BUILD_REVEAL_SPAN,
-} from '../animation/build';
-import type { ColorDistribution, ResolvedBuildOptions } from '../core/types';
-import type { Particle } from './create-particles';
-import { createParticleColorBuffer } from './particle-colors';
+} from '../animation/build.js';
+import type { ColorDistribution, ResolvedBuildOptions } from '../core/types.js';
+import type { Particle } from './create-particles.js';
+import { createParticleColorBuffer } from './particle-colors.js';
 
 export interface ParticlePointsStyle {
   /** World-space point diameter scale (multiplier on globe radius). */

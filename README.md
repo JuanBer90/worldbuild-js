@@ -5,7 +5,7 @@ WorldBuild renders a transparent, particle-based 3D Earth from the bundled Natur
 ## Installation
 
 ```bash
-npm install worldbuild-js three
+npm install worldbuild-js
 ```
 
 ## Quick start
@@ -24,7 +24,7 @@ const world = new WorldBuild({
 });
 ```
 
-The constructor adds a transparent canvas to the container and starts the default construction sequence automatically. The default sequence builds land particles from south to north, pauses briefly, then begins a clockwise rotation.
+The constructor adds a transparent canvas to the container and starts the default construction sequence automatically. The default sequence builds land particles from south to north, then immediately begins a clockwise rotation when construction completes.
 
 ## Configuration
 
@@ -158,7 +158,7 @@ particles: {
 
 ## Development
 
-Requires Node.js 24 LTS (`>=24 <25`). The bundled land data and compact continent IDs are generated from [Natural Earth 1:110m Land](https://www.naturalearthdata.com/) (`data/source/world-land.geojson`) and Natural Earth 1:110m Admin 0 Countries (`data/source/world-countries.geojson`). After changing either source file, regenerate the runtime dataset:
+Requires Node.js 20 or later. The bundled land data and compact continent IDs are generated from [Natural Earth 1:110m Land](https://www.naturalearthdata.com/) (`data/source/world-land.geojson`) and Natural Earth 1:110m Admin 0 Countries (`data/source/world-countries.geojson`). After changing either source file, regenerate the runtime dataset:
 
 ```bash
 npm run generate:data
@@ -176,3 +176,5 @@ npm run build
 ## License
 
 MIT — see [LICENSE](./LICENSE).
+
+The bundled geographic data is derived from Natural Earth public-domain data.

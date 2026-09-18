@@ -1,13 +1,21 @@
 {
   "name": "worldbuild-js",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A configurable 3D animation engine for constructing the world from particles",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JuanBer90/worldbuild-js.git"
+  },
+  "homepage": "https://github.com/JuanBer90/worldbuild-js#readme",
+  "bugs": {
+    "url": "https://github.com/JuanBer90/worldbuild-js/issues"
+  },
   "private": false,
   "type": "module",
   "sideEffects": false,
   "engines": {
-    "node": ">=24 <25"
+    "node": ">=20"
   },
   "files": [
     "dist"
@@ -15,9 +23,11 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/worldbuild-js.js"
+      "import": "./dist/worldbuild-js.js",
+      "default": "./dist/worldbuild-js.js"
     }
   },
+  "main": "./dist/worldbuild-js.js",
   "module": "./dist/worldbuild-js.js",
   "types": "./dist/index.d.ts",
   "scripts": {
@@ -28,7 +38,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "generate:data": "tsx scripts/generate-world-points.ts"
+    "generate:data": "tsx scripts/generate-world-points.ts",
+    "prepack": "npm run build"
   },
   "dependencies": {
     "three": "^0.186.0"

@@ -1,5 +1,5 @@
 import { Color } from 'three';
-import type { Particle } from './create-particles';
+import type { Particle } from './create-particles.js';
 
 const FIRST_VALIDATION_COLOR = 0x123456;
 const SECOND_VALIDATION_COLOR = 0xabcdef;

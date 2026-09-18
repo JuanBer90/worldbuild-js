@@ -1,4 +1,4 @@
-import { latLonToCartesian, type Vector3 } from './coordinates';
+import { latLonToCartesian, type Vector3 } from './coordinates.js';
 
 /** Placeholder for a future land-point sampler (GeoJSON / TopoJSON). */
 export interface LandSamplePoint {
