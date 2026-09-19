@@ -4,6 +4,7 @@ export type {
   WorldBuildOptions,
   BuildOptions,
   BuildAnimation,
+  BuildDirection,
   ColorDistribution,
   ParticleOptions,
   RotationOptions,

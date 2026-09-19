@@ -7,7 +7,7 @@
     "type": "git",
     "url": "git+https://github.com/JuanBer90/worldbuild-js.git"
   },
-  "homepage": "https://github.com/JuanBer90/worldbuild-js#readme",
+  "homepage": "https://juanber90.github.io/worldbuild-js/",
   "bugs": {
     "url": "https://github.com/JuanBer90/worldbuild-js/issues"
   },
@@ -32,13 +32,16 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "dev": "vite --config playground/vite.config.ts",
+    "playground": "vite --config playground/vite.config.ts",
     "build": "vite build",
+    "build:playground": "vite build --config playground/vite.config.ts",
     "test": "vitest run",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "generate:data": "tsx scripts/generate-world-points.ts",
+    "check": "npm run typecheck && npm run lint && npm test && npm run build && npm run build:playground",
     "prepack": "npm run build"
   },
   "dependencies": {

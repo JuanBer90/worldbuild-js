@@ -56,12 +56,17 @@ export function resolveWorldBuildOptions(options: WorldBuildOptions): ResolvedWo
     }
   }
 
+  const buildDirection = options.build?.direction ?? 'south-to-north';
+  if (buildDirection !== 'south-to-north' && buildDirection !== 'north-to-south') {
+    throw new RangeError('build.direction must be "south-to-north" or "north-to-south"');
+  }
+
   return {
     container: options.container,
     build: {
       enabled: options.build?.enabled ?? true,
       animation: options.build?.animation ?? 'south-to-north',
-      direction: options.build?.direction ?? 'south-to-north',
+      direction: buildDirection,
       duration: options.build?.duration ?? DEFAULT_BUILD_DURATION_MS,
       randomness: options.build?.randomness ?? DEFAULT_BUILD_RANDOMNESS,
     },

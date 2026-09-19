@@ -1,4 +1,4 @@
-import type { ResolvedBuildOptions } from '../core/types.js';
+import type { BuildDirection, ResolvedBuildOptions } from '../core/types.js';
 import type { Vector3 } from '../geography/coordinates.js';
 
 export const BUILD_REVEAL_SPAN = 0.14;
@@ -15,15 +15,18 @@ export interface BuildController {
 }
 
 /**
- * Creates stable south-to-north reveal start points for GPU particle attributes.
+ * Creates stable latitude-ordered reveal start points for GPU particle attributes.
  * Each index receives the same signed offset for a given build configuration.
  */
 export function createBuildStartProgress(
   latitude: number,
   particleIndex: number,
   randomness: number,
+  direction: BuildDirection = 'south-to-north',
 ): number {
-  const latitudeProgress = clamp((latitude + 90) / 180, 0, 1);
+  const southToNorthProgress = clamp((latitude + 90) / 180, 0, 1);
+  const latitudeProgress =
+    direction === 'north-to-south' ? 1 - southToNorthProgress : southToNorthProgress;
   const organicOffset = (deterministicUnit(particleIndex) * 2 - 1) * randomness;
   return clamp(latitudeProgress + organicOffset, 0, 1) * (1 - BUILD_REVEAL_SPAN);
 }
@@ -72,9 +75,6 @@ export function createFromEdgesOrigins(
 
 /** Controls one global GPU build-progress uniform without per-particle animation work. */
 export function createBuildController(options: ResolvedBuildOptions): BuildController {
-  if (options.animation === 'south-to-north' && options.direction !== 'south-to-north') {
-    throw new Error('Only build.direction "south-to-north" is currently supported');
-  }
   if (!Number.isFinite(options.duration) || options.duration <= 0) {
     throw new RangeError('build.duration must be a positive finite number of milliseconds');
   }

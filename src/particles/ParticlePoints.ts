@@ -171,7 +171,12 @@ export class ParticlePoints {
       const particle = particles[index]!;
       this.buildStartBuffer[index] = build.animation === 'from-edges'
         ? createFromEdgesStartProgress(index, build.randomness)
-        : createBuildStartProgress(particle.latitude, index, build.randomness);
+        : createBuildStartProgress(
+            particle.latitude,
+            index,
+            build.randomness,
+            build.direction,
+          );
     }
   }
 }

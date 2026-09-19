@@ -7,6 +7,7 @@ export interface BuildOptions {
   enabled?: boolean;
   /** Construction strategy. Defaults to south-to-north. */
   animation?: BuildAnimation;
+  /** Latitude reveal order for `animation: 'south-to-north'`. Defaults to south-to-north. */
   direction?: BuildDirection;
   /** Milliseconds for the selected construction animation. Defaults to 4,000. */
   duration?: number;
