@@ -47,6 +47,48 @@ describe('ParticlePoints', () => {
     particlePoints.dispose();
   });
 
+  it('orders buildStart by latitude according to build.direction', () => {
+    const particles = createParticlesFromLandTuples(
+      [
+        [-60, 0],
+        [60, 0],
+      ],
+      1,
+      { size: 1, color: '#ffffff', opacity: 1 },
+    );
+    const buildOrigins = new Float32Array(particles.length * 3);
+
+    const southToNorth = new ParticlePoints(particles, {
+      size: 1,
+      globeRadius: 1,
+      color: '#ffffff',
+      colors: [],
+      opacity: 1,
+      hideBackside: true,
+      build: { ...BUILD_OPTIONS, direction: 'south-to-north', randomness: 0 },
+      buildOrigins,
+    });
+    const southToNorthStarts = southToNorth.object.geometry.getAttribute('buildStart');
+    expect(southToNorthStarts.getX(0)).toBeLessThan(southToNorthStarts.getX(1));
+
+    southToNorth.dispose();
+
+    const northToSouth = new ParticlePoints(particles, {
+      size: 1,
+      globeRadius: 1,
+      color: '#ffffff',
+      colors: [],
+      opacity: 1,
+      hideBackside: true,
+      build: { ...BUILD_OPTIONS, direction: 'north-to-south', randomness: 0 },
+      buildOrigins,
+    });
+    const northToSouthStarts = northToSouth.object.geometry.getAttribute('buildStart');
+    expect(northToSouthStarts.getX(0)).toBeGreaterThan(northToSouthStarts.getX(1));
+
+    northToSouth.dispose();
+  });
+
   it('keeps the x-ray rendering path in the same shader when the backside is shown', () => {
     const particles = createParticlesFromLandTuples([[0, 0]], 1, {
       size: 1,

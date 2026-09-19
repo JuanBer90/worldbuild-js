@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  BUILD_REVEAL_SPAN,
   createBuildController,
   createFromEdgesOrigins,
   createFromEdgesStartProgress,
@@ -37,6 +38,42 @@ describe('build controller', () => {
     const northernStart = createBuildStartProgress(60, 10, BUILD_OPTIONS.randomness);
 
     expect(southernStart).toBeLessThan(northernStart);
+  });
+
+  it('orders northern particles before southern particles for north-to-south', () => {
+    const northernStart = createBuildStartProgress(60, 10, BUILD_OPTIONS.randomness, 'north-to-south');
+    const southernStart = createBuildStartProgress(-60, 10, BUILD_OPTIONS.randomness, 'north-to-south');
+
+    expect(northernStart).toBeLessThan(southernStart);
+  });
+
+  it('inverts latitude ordering between south-to-north and north-to-south at zero randomness', () => {
+    const latitude = 35;
+    const index = 17;
+    const southToNorth = createBuildStartProgress(latitude, index, 0, 'south-to-north');
+    const northToSouth = createBuildStartProgress(latitude, index, 0, 'north-to-south');
+
+    expect(southToNorth + northToSouth).toBeCloseTo(1 - BUILD_REVEAL_SPAN, 5);
+  });
+
+  it('preserves randomness semantics for north-to-south builds', () => {
+    const first = createBuildStartProgress(-10, 42, BUILD_OPTIONS.randomness, 'north-to-south');
+    const second = createBuildStartProgress(-10, 42, BUILD_OPTIONS.randomness, 'north-to-south');
+    const differentParticle = createBuildStartProgress(-10, 43, BUILD_OPTIONS.randomness, 'north-to-south');
+
+    expect(first).toBe(second);
+    expect(differentParticle).not.toBe(first);
+  });
+
+  it('accepts north-to-south with the latitude build animation', () => {
+    const build = createBuildController({
+      ...BUILD_OPTIONS,
+      direction: 'north-to-south',
+    });
+
+    expect(build.getProgress()).toBe(0);
+    build.start();
+    expect(build.advance(BUILD_OPTIONS.duration)).toBe(1);
   });
 
   it('uses deterministic organic timing offsets', () => {

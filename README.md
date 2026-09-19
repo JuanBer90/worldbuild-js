@@ -2,6 +2,12 @@
 
 WorldBuild renders a transparent, particle-based 3D Earth from the bundled Natural Earth land dataset. It constructs the globe, then optionally rotates it around its geographic Y axis.
 
+<p align="center">
+  <img src="./docs/worldbuild-playground.webp" alt="WorldBuild interactive particle globe demo" width="100%">
+</p>
+
+<p align="center"><a href="https://juanber90.github.io/worldbuild-js/">Live Demo</a></p>
+
 ## Installation
 
 ```bash
@@ -67,7 +73,7 @@ const world = new WorldBuild({
 | --- | --- | --- | --- |
 | `enabled` | `boolean` | `true` | Runs the construction sequence before rotation. Set to `false` to render the complete globe immediately. |
 | `animation` | `'south-to-north' \| 'from-edges'` | `'south-to-north'` | Construction animation. `south-to-north` reveals particles by latitude. `from-edges` brings particles from deterministic camera-relative perimeter origins to their geographic positions. |
-| `direction` | `'south-to-north' \| 'north-to-south'` | `'south-to-north'` | Direction option. The latitude animation currently supports only `'south-to-north'`; using `'north-to-south'` with `animation: 'south-to-north'` throws. It does not affect `from-edges`. |
+| `direction` | `'south-to-north' \| 'north-to-south'` | `'south-to-north'` | Latitude reveal order when `animation` is `'south-to-north'`. `'south-to-north'` builds from the southernmost land toward the north; `'north-to-south'` is the inverse. Ignored when `animation` is `'from-edges'`. |
 | `duration` | `number` | `4000` | Construction duration in milliseconds. Must be a positive finite number. |
 | `randomness` | `number` | `0.12` | Deterministic per-particle timing variation from `0` through `1`. |
 
@@ -156,6 +162,23 @@ particles: {
 | `resize()` | Resizes the canvas to the current container dimensions and renders once. Call after changing container size when it is not otherwise managed. |
 | `destroy()` | Stops rendering, disposes render resources, and removes the canvas from its container. |
 
+## Playground
+
+`playground/` is a consumer-style Vite app that imports the library through the public package name:
+
+```ts
+import { WorldBuild } from 'worldbuild-js';
+```
+
+Locally, Vite resolves that import to the in-repo source while you iterate. The hosted demo at [Live Demo](https://juanber90.github.io/worldbuild-js/) is built from the same entry point and deployed to GitHub Pages on pushes to `main`.
+
+```bash
+npm run playground
+npm run build:playground
+```
+
+Add a recorded preview at [`docs/worldbuild-playground.webp`](./docs/worldbuild-playground.webp) for the README hero (WebP or swap the path if you prefer another format).
+
 ## Development
 
 Requires Node.js 20 or later. The bundled land data and compact continent IDs are generated from [Natural Earth 1:110m Land](https://www.naturalearthdata.com/) (`data/source/world-land.geojson`) and Natural Earth 1:110m Admin 0 Countries (`data/source/world-countries.geojson`). After changing either source file, regenerate the runtime dataset:
@@ -166,11 +189,12 @@ npm run generate:data
 
 ```bash
 npm install
-npm run dev
+npm run playground
 npm run typecheck
 npm run lint
 npm run test
 npm run build
+npm run check
 ```
 
 ## License

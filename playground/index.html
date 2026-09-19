@@ -3,11 +3,144 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WorldBuild Playground</title>
-    <link rel="stylesheet" href="/style.css" />
+    <title>WorldBuild — Live demo</title>
+    <meta
+      name="description"
+      content="Interactive particle globe built with WorldBuild."
+    />
   </head>
   <body>
-    <div id="worldbuild-container"></div>
-    <script type="module" src="/main.ts"></script>
+    <main class="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-name">WorldBuild</span>
+          <span class="brand-tag">Live demo</span>
+        </div>
+        <a
+          class="repo-link"
+          href="https://github.com/JuanBer90/worldbuild-js"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GitHub
+        </a>
+      </header>
+
+      <section class="stage" aria-label="Particle globe">
+        <div class="stage-inner">
+          <div id="globe" class="globe-host"></div>
+
+          <aside class="color-controls" aria-label="Color controls">
+            <form id="color-controls-form" class="toolbar-panel color-toolbar mode-palette">
+              <label class="field">
+                <span>Color distribution</span>
+                <select id="color-distribution" name="colorDistribution">
+                  <option value="continent">Continent</option>
+                  <option value="spatial">Spatial</option>
+                  <option value="random">Random</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span>Particle color</span>
+                <select id="color-mode" name="colorMode" aria-label="Particle color mode">
+                  <option value="palette">Palette</option>
+                  <option value="single">Single</option>
+                </select>
+              </label>
+
+              <fieldset class="palette-fieldset" id="palette-fieldset">
+                <legend class="palette-legend">Palette</legend>
+                <div class="palette-grid">
+                  <label class="field field-swatch">
+                    <span class="visually-hidden">Palette color 1</span>
+                    <input id="palette-0" type="color" value="#FF4057" aria-label="Palette color 1" />
+                  </label>
+                  <label class="field field-swatch">
+                    <span class="visually-hidden">Palette color 2</span>
+                    <input id="palette-1" type="color" value="#FF9D32" aria-label="Palette color 2" />
+                  </label>
+                  <label class="field field-swatch">
+                    <span class="visually-hidden">Palette color 3</span>
+                    <input id="palette-2" type="color" value="#F6D83B" aria-label="Palette color 3" />
+                  </label>
+                  <label class="field field-swatch">
+                    <span class="visually-hidden">Palette color 4</span>
+                    <input id="palette-3" type="color" value="#22E68A" aria-label="Palette color 4" />
+                  </label>
+                  <label class="field field-swatch">
+                    <span class="visually-hidden">Palette color 5</span>
+                    <input id="palette-4" type="color" value="#1EDBE5" aria-label="Palette color 5" />
+                  </label>
+                  <label class="field field-swatch">
+                    <span class="visually-hidden">Palette color 6</span>
+                    <input id="palette-5" type="color" value="#35A7FF" aria-label="Palette color 6" />
+                  </label>
+                  <label class="field field-swatch palette-wide">
+                    <span class="visually-hidden">Palette color 7</span>
+                    <input id="palette-6" type="color" value="#9A4DFF" aria-label="Palette color 7" />
+                  </label>
+                </div>
+              </fieldset>
+
+              <label class="field field-color single-color-field" id="single-color-field">
+                <span>Single color</span>
+                <input id="particle-color" type="color" value="#c8e6ff" aria-label="Single particle color" />
+              </label>
+
+              <label class="field field-color">
+                <span>Background</span>
+                <input
+                  id="background-color"
+                  type="color"
+                  value="#0a0c10"
+                  aria-label="Demo background color"
+                />
+              </label>
+
+              <div class="color-actions">
+                <button id="reset-colors" type="button">Reset colors</button>
+              </div>
+            </form>
+          </aside>
+        </div>
+      </section>
+
+      <aside class="controls" aria-label="Globe controls">
+        <form id="controls-form" class="toolbar-panel controls-form">
+          <label class="field">
+            <span>Build direction</span>
+            <select id="build-direction" name="buildDirection">
+              <option value="south-to-north">South → north</option>
+              <option value="north-to-south">North → south</option>
+            </select>
+          </label>
+
+          <label class="field field-range">
+            <span>Particle size</span>
+            <input
+              id="particle-size"
+              name="particleSize"
+              type="range"
+              min="0.5"
+              max="2.5"
+              step="0.1"
+              value="1"
+            />
+            <output id="particle-size-value" for="particle-size">1.0</output>
+          </label>
+
+          <label class="field field-check">
+            <span>Rotation</span>
+            <input id="rotation-enabled" name="rotationEnabled" type="checkbox" checked />
+          </label>
+
+          <div class="actions">
+            <button id="replay" type="button">Replay build</button>
+          </div>
+        </form>
+      </aside>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

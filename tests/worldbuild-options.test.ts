@@ -110,4 +110,16 @@ describe('WorldBuild globe options', () => {
   it('preserves an explicit from-edges build animation', () => {
     expect(resolve(undefined, undefined, { animation: 'from-edges' }).build.animation).toBe('from-edges');
   });
+
+  it('preserves an explicit north-to-south build direction', () => {
+    expect(resolve(undefined, undefined, { direction: 'north-to-south' }).build.direction).toBe(
+      'north-to-south',
+    );
+  });
+
+  it('rejects invalid build directions at runtime', () => {
+    expect(() =>
+      resolve(undefined, undefined, { direction: 'east-to-west' as BuildOptions['direction'] }),
+    ).toThrow(RangeError);
+  });
 });
