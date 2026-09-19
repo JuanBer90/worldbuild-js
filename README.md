@@ -3,7 +3,7 @@
 WorldBuild renders a transparent, particle-based 3D Earth from the bundled Natural Earth land dataset. It constructs the globe, then optionally rotates it around its geographic Y axis.
 
 <p align="center">
-  <img src="./docs/worldbuild-playground.webp" alt="WorldBuild interactive particle globe demo" width="100%">
+  <img src="./docs/worldbuild-playground.webp" alt="WorldBuild Playground" width="500">
 </p>
 
 <p align="center"><a href="https://juanber90.github.io/worldbuild-js/">Live Demo</a></p>
@@ -170,14 +170,12 @@ particles: {
 import { WorldBuild } from 'worldbuild-js';
 ```
 
-Locally, Vite resolves that import to the in-repo source while you iterate. The hosted demo at [Live Demo](https://juanber90.github.io/worldbuild-js/) is built from the same entry point and deployed to GitHub Pages on pushes to `main`.
+Locally, Vite resolves that import to the in-repo source while you iterate. The GitHub Pages site is built from the same entry point and deployed on pushes to `main`.
 
 ```bash
 npm run playground
 npm run build:playground
 ```
-
-Add a recorded preview at [`docs/worldbuild-playground.webp`](./docs/worldbuild-playground.webp) for the README hero (WebP or swap the path if you prefer another format).
 
 ## Development
 

@@ -15,8 +15,13 @@ const XION_PALETTE = [
   '#9A4DFF',
 ] as const;
 
-const DEFAULT_SINGLE_COLOR = '#c8e6ff';
+const DEFAULT_SINGLE_COLOR = '#E7D508';
 const DEFAULT_BACKGROUND = '#0a0c10';
+const DEFAULT_BUILD_DIRECTION = 'south-to-north';
+const DEFAULT_COLOR_DISTRIBUTION: ColorDistribution = 'continent';
+const DEFAULT_COLOR_MODE = 'palette';
+const DEFAULT_PARTICLE_SIZE = 1;
+const DEFAULT_ROTATION_ENABLED = true;
 const PALETTE_SIZE = XION_PALETTE.length;
 
 type ColorMode = 'palette' | 'single';
@@ -40,6 +45,7 @@ const colorModeSelect = document.querySelector<HTMLSelectElement>('#color-mode')
 const particleColorInput = document.querySelector<HTMLInputElement>('#particle-color');
 const backgroundColorInput = document.querySelector<HTMLInputElement>('#background-color');
 const resetColorsButton = document.querySelector<HTMLButtonElement>('#reset-colors');
+const resetDemoButton = document.querySelector<HTMLButtonElement>('#reset-demo');
 const particleSizeInput = document.querySelector<HTMLInputElement>('#particle-size');
 const particleSizeValue = document.querySelector<HTMLOutputElement>('#particle-size-value');
 const rotationEnabledInput = document.querySelector<HTMLInputElement>('#rotation-enabled');
@@ -63,6 +69,7 @@ if (
   !particleColorInput ||
   !backgroundColorInput ||
   !resetColorsButton ||
+  !resetDemoButton ||
   !particleSizeInput ||
   !particleSizeValue ||
   !rotationEnabledInput ||
@@ -144,16 +151,29 @@ const remountFromControls = (): void => {
   mount(readState());
 };
 
-const resetColorDefaults = (): void => {
+const applyColorDefaults = (): void => {
   XION_PALETTE.forEach((color, index) => {
     paletteInputs[index]!.value = color;
   });
   particleColorInput.value = DEFAULT_SINGLE_COLOR;
   backgroundColorInput.value = DEFAULT_BACKGROUND;
-  colorModeSelect.value = 'palette';
-  colorDistributionSelect.value = 'continent';
+  colorModeSelect.value = DEFAULT_COLOR_MODE;
+  colorDistributionSelect.value = DEFAULT_COLOR_DISTRIBUTION;
   syncColorModeUi();
   applyBackground(DEFAULT_BACKGROUND);
+};
+
+const applyDemoDefaults = (): void => {
+  buildDirectionSelect.value = DEFAULT_BUILD_DIRECTION;
+  particleSizeInput.value = String(DEFAULT_PARTICLE_SIZE);
+  rotationEnabledInput.checked = DEFAULT_ROTATION_ENABLED;
+  applyColorDefaults();
+  syncParticleSizeLabel();
+  remountFromControls();
+};
+
+const resetColorDefaults = (): void => {
+  applyColorDefaults();
   remountFromControls();
 };
 
@@ -200,6 +220,10 @@ colorForm.addEventListener('input', (event) => {
 
 resetColorsButton.addEventListener('click', () => {
   resetColorDefaults();
+});
+
+resetDemoButton.addEventListener('click', () => {
+  applyDemoDefaults();
 });
 
 particleSizeInput.addEventListener('input', () => {

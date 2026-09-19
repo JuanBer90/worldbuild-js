@@ -363,6 +363,7 @@ body {
   flex: 0 0 auto;
   display: flex;
   align-items: flex-end;
+  gap: 8px;
 }
 
 .actions button {
@@ -394,9 +395,14 @@ body {
 }
 
 @media (max-width: 640px) {
+  .stage {
+    padding-top: clamp(16px, 5vw, 28px);
+    padding-bottom: clamp(12px, 3vw, 18px);
+  }
+
   .stage-inner {
     flex-direction: column;
-    gap: 12px;
+    gap: 18px;
   }
 
   .color-controls {
@@ -439,14 +445,20 @@ body {
     grid-column: 1 / -1;
   }
 
-  .actions button {
+  .actions {
     width: 100%;
   }
 
+  .actions button {
+    flex: 1;
+    min-width: 0;
+  }
+
   .globe-host {
-    width: min(94vw, 520px);
-    height: min(94vw, 520px);
-    max-height: calc(100dvh - 380px);
+    width: min(68vw, 260px);
+    height: min(68vw, 260px);
+    max-height: min(68vw, 260px);
+    margin-inline: auto;
   }
 }
 
