@@ -1,6 +1,6 @@
 {
   "name": "worldbuild-js",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A configurable 3D animation engine for constructing the world from particles",
   "license": "MIT",
   "repository": {
